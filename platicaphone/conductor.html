@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plática Phone Conductor</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #111;
+      overflow: hidden;
+    }
+    #structure {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #board {
+      position: absolute;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+    .gaprow { flex: 0 0 auto; }
+    .box {
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .box.circle { border-radius: 50%; }
+    .box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+    .box.circle img { border-radius: 50%; }
+    .selected { outline-offset: -5px; }
+
+    #pbar {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 4px 4px;
+      z-index: 50;
+      max-width: 96vw;
+      overflow: hidden;
+    }
+    .buttonz {
+      border: 2px solid #4CAF50;
+      border-radius: 1vw;
+      min-width: 0;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .buttonz img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+    #nivelchip {
+      position: fixed;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      z-index: 51;
+      user-select: none;
+    }
+
+    #creditsOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #f0f8ff;
+      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+    #creditsCard {
+      width: min(92vw, 620px);
+      max-height: 86vh;
+      overflow: auto;
+      background: rgba(255,255,255,.94);
+      border: 2px solid #4CAF50;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+      padding: 22px 26px;
+    }
+    #creditsCard h1 {
+      margin: 0 0 12px;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+    }
+    #creditsCard ul {
+      display: inline-block;
+      margin: 0;
+      padding-left: 1.2em;
+      text-align: left;
+      line-height: 1.55;
+      font-size: clamp(1rem, 2.3vw, 1.2rem);
+    }
+
+  </style>
+</head>
+<body>
+<script>
+(function () {
+  let selectedNivel = readStoredNivel();
+  let selectedPronounId = null;
+  let selectedBox = null;
+  let currentAudio = [];
+  let board = null;
+  let nivelchip = null;
+  let creditsTransitionLocked = false;
+  let creditsTransitionTimer = null;
+
+  const MINIMUM_CREDITS_DELAY_MS = 2000;
+  const CREDITS_HTML = `<li><strong>Project Assistant:</strong> AJ Cornell</li>
+      <li><strong>Male Voice:</strong> Jimmy Self</li>
+      <li><strong>Female Voice:</strong> Reina Maldonado</li>
+      <li><strong>Actors:</strong></li>
+      <li><strong></strong>-   Jose Garcia</li>
+      <li><strong></strong>-   Susana Mejia</li>
+      <li><strong></strong>-   Maria Flores</li>
+      <li><strong></strong>-   Lucia Garcia</li>
+      <li><strong></strong>-   Roberto Gomez</li>
+      <li><strong></strong>-   Noel Romero</li>
+      <li><strong></strong>-   AJ Cornell</li>`;
+
+  function showCreditsOverlay() {
+    const oldOverlay = document.getElementById("creditsOverlay");
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "creditsOverlay";
+    overlay.setAttribute("aria-live", "polite");
+
+    const card = document.createElement("div");
+    card.id = "creditsCard";
+    card.innerHTML = '<h1>Créditos</h1><ul>' + CREDITS_HTML + '</ul>';
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
+
+  function hideCreditsOverlay() {
+    const overlay = document.getElementById("creditsOverlay");
+    if (overlay) overlay.remove();
+  }
+
+  function runAfterCredits(callback) {
+    if (creditsTransitionLocked) return;
+
+    creditsTransitionLocked = true;
+    showCreditsOverlay();
+    window.clearTimeout(creditsTransitionTimer);
+
+    creditsTransitionTimer = window.setTimeout(() => {
+      hideCreditsOverlay();
+      creditsTransitionLocked = false;
+      if (typeof callback === "function") callback();
+    }, MINIMUM_CREDITS_DELAY_MS);
+  }
+
+  function startAfterCredits() {
+    runAfterCredits(boot);
+  }
+
+  function readStoredNivel() {
+    const stored =
+      sessionStorage.getItem("selectedNivel") ||
+      sessionStorage.getItem("nivel") ||
+      sessionStorage.getItem("selectedLevel") ||
+      sessionStorage.getItem("level") ||
+      sessionStorage.getItem("currentLevel") ||
+      sessionStorage.getItem("selectedLesson") ||
+      sessionStorage.getItem("lesson") ||
+      sessionStorage.getItem("currentLesson") ||
+      "1";
+    const n = Number(stored);
+    return Number.isFinite(n) && n >= 1 && n <= 20 ? n : 1;
+  }
+
+  function saveNivel(n) {
+    selectedNivel = n;
+    sessionStorage.setItem("lesson", String(n));
+    sessionStorage.setItem("selectedLesson", String(n));
+    sessionStorage.setItem("currentLesson", String(n));
+    sessionStorage.setItem("level", String(n));
+    sessionStorage.setItem("selectedLevel", String(n));
+    sessionStorage.setItem("currentLevel", String(n));
+    sessionStorage.setItem("nivel", String(n));
+    sessionStorage.setItem("selectedNivel", String(n));
+    sessionStorage.setItem("platicaMode", "phone");
+    sessionStorage.setItem("phoneMode", "1");
+    sessionStorage.removeItem("desktopMode");
+    if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
+  }
+
+  function go404(reason) {
+    try { sessionStorage.setItem("conductorError", reason || "Missing required phone structure"); } catch(e) {}
+    window.location.replace("../404.html");
+  }
+
+  function parseStoredJSON(key, fallback) {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); }
+    catch (e) { return fallback; }
+  }
+
+  function readRequiredRows() {
+    const rows = parseStoredJSON("phoneLayoutRows", null) || parseStoredJSON("layoutRows", null);
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      go404("Missing or empty sessionStorage key: phoneLayoutRows/layoutRows");
+      return null;
+    }
+
+    const valid = rows.every(row => {
+      if (!row || typeof row !== "object") return false;
+      if (row.group === "gap") return true;
+      if (row.group !== "pronouns" && row.group !== "objects") return false;
+      if (row.role && row.role !== "pronoun" && row.role !== "object" && row.role !== "expression") return false;
+      return Array.isArray(row.ids) && row.ids.every(id => Number.isFinite(Number(id)));
+    });
+
+    if (!valid) {
+      go404("phoneLayoutRows has an invalid row structure");
+      return null;
+    }
+    return rows;
+  }
+
+  function readRequiredButtons() {
+    const buttons = parseStoredJSON("buttonSlots", null);
+
+    if (!Array.isArray(buttons) || buttons.length === 0) {
+      go404("Missing or empty sessionStorage key: buttonSlots");
+      return null;
+    }
+
+    const valid = buttons.every(btn => {
+      const img = btn && (btn.img || btn.image);
+      return btn &&
+             typeof btn === "object" &&
+             typeof btn.action === "string" &&
+             typeof img === "string" &&
+             typeof btn.title === "string";
+    });
+
+    if (!valid) {
+      go404("buttonSlots has an invalid button structure");
+      return null;
+    }
+
+    return buttons;
+  }
+
+  function styleConfig() {
+    return parseStoredJSON("phoneStyle", {}) || {};
+  }
+
+  function setStyle(el, prop, value) {
+    if (value !== undefined && value !== null && value !== "") el.style[prop] = String(value);
+  }
+
+  function applyPhoneStyle(style) {
+    document.body.style.background = style.bodyBackground || "#f0f8ff";
+
+    const structure = document.getElementById("structure");
+    const pbar = document.getElementById("pbar");
+    structure.style.background = style.bodyBackground || "#f0f8ff";
+
+    setStyle(board, "top", style.boardTop || "0.35vh");
+    setStyle(board, "bottom", style.boardBottom || "8.6vh");
+    setStyle(board, "padding", style.boardPadding || "0 1px");
+    setStyle(board, "gap", style.rowGap || "0px");
+
+    pbar.style.bottom = style.buttonBarBottom || "2vh";
+    pbar.style.gap = style.buttonGap || "0.35vh";
+
+    document.querySelectorAll(".buttonz").forEach(btn => {
+      btn.style.width = style.buttonWidth || "10.8vw";
+      btn.style.height = style.buttonHeight || "5vh";
+      btn.style.maxHeight = style.buttonMaxHeight || "44px";
+      btn.style.background = style.buttonBackground || "#d05000";
+    });
+
+    nivelchip.style.right = style.chipRight || "3vw";
+    nivelchip.style.bottom = style.chipBottom || "9.8vh";
+
+    document.querySelectorAll(".selected").forEach(el => {
+      el.style.outline = style.selectedOutline || "5px solid red";
+    });
+  }
+
+  function buildShell(rows, buttons) {
+    document.body.innerHTML = "";
+
+    const structure = document.createElement("div");
+    structure.id = "structure";
+
+    board = document.createElement("div");
+    board.id = "board";
+
+    const style = styleConfig();
+
+    rows.forEach(row => {
+      if (row.group === "gap") {
+        const gap = document.createElement("div");
+        gap.className = "gaprow";
+        setStyle(gap, "height", row.value || style.gapHeight || "1.2vh");
+        setStyle(gap, "maxHeight", style.gapMaxHeight || "16px");
+        board.appendChild(gap);
+        return;
+      }
+
+      const rowEl = document.createElement("div");
+      rowEl.className = "row";
+      rowEl.dataset.group = row.group;
+      rowEl.dataset.role = row.role || (row.group === "pronouns" ? "pronoun" : "object");
+      rowEl.dataset.columns = String(row.columns || row.ids.length);
+      setStyle(rowEl, "maxWidth", style.rowMaxWidth || "760px");
+      setStyle(rowEl, "gap", style.rowGap || "0px");
+
+      row.ids.forEach(id => {
+        const role = row.role || (row.group === "pronouns" ? "pronoun" : "object");
+        const box = document.createElement("div");
+        box.className = "box" + ((row.shape === "circle" || role === "expression") ? " circle" : "");
+        box.dataset.group = row.group;
+        box.dataset.role = role;
+        box.dataset.id = String(id);
+        box.dataset.name = row.group + String(id);
+
+        if (role === "expression") {
+          setStyle(box, "width", style.expressionWidth || "min(22vw, 11.5vh, 92px)");
+          setStyle(box, "height", style.expressionHeight || "min(22vw, 11.5vh, 92px)");
+        } else {
+          setStyle(box, "width", style.boxWidth || "min(25.2vw, 13.4vh, 106px)");
+          setStyle(box, "height", style.boxHeight || "min(25.2vw, 13.4vh, 106px)");
+        }
+
+        const img = document.createElement("img");
+        img.alt = role + " " + id;
+        box.appendChild(img);
+        rowEl.appendChild(box);
+      });
+
+      board.appendChild(rowEl);
+    });
+
+    structure.appendChild(board);
+    document.body.appendChild(structure);
+
+    const pbar = document.createElement("div");
+    pbar.id = "pbar";
+
+    buttons.forEach(btn => {
+      const b = document.createElement("div");
+      b.className = "buttonz";
+      b.dataset.btn = btn.action;
+      b.title = btn.title;
+
+      const img = document.createElement("img");
+      img.src = btn.img || btn.image;
+      img.alt = btn.alt || btn.title;
+      b.appendChild(img);
+      pbar.appendChild(b);
+    });
+
+    nivelchip = document.createElement("div");
+    nivelchip.id = "nivelchip";
+    nivelchip.textContent = "Nivel " + selectedNivel;
+
+    document.body.appendChild(pbar);
+    document.body.appendChild(nivelchip);
+  }
+
+  function nivelRoot() {
+    return "../group/lesson" + selectedNivel;
+  }
+
+  function imagePath(group, id) {
+    return nivelRoot() + "/" + group + "/images/p" + id + ".png?v=" + Date.now();
+  }
+
+  function audioPath(group, id) {
+    return nivelRoot() + "/" + group + "/audios/a" + id + ".m4a";
+  }
+
+  function translationPath() {
+    selectedNivel = readStoredNivel();
+    return "../translation/" + selectedNivel + ".m4a";
+  }
+
+  function stopAllAudio() {
+    currentAudio.forEach(a => {
+      try { a.pause(); a.currentTime = 0; } catch(e) {}
+    });
+    currentAudio = [];
+  }
+
+  function makeAudio(src) {
+    const a = new Audio(src);
+    currentAudio.push(a);
+    a.addEventListener("ended", () => {
+      currentAudio = currentAudio.filter(x => x !== a);
+    });
+    return a;
+  }
+
+  function playOne(src) {
+    stopAllAudio();
+    const a = makeAudio(src);
+    a.play().catch(() => {});
+  }
+
+  function playChain(firstSrc, secondSrc) {
+    stopAllAudio();
+    const a = makeAudio(firstSrc);
+    a.addEventListener("ended", () => {
+      const b = makeAudio(secondSrc);
+      b.play().catch(() => {});
+    }, { once: true });
+    a.play().catch(() => {
+      const b = makeAudio(secondSrc);
+      b.play().catch(() => {});
+    });
+  }
+
+  function clearSelection() {
+    selectedPronounId = null;
+    if (selectedBox) {
+      selectedBox.classList.remove("selected");
+      selectedBox.style.outline = "";
+    }
+    selectedBox = null;
+  }
+
+  function selectPronoun(box, id) {
+    if (selectedBox) {
+      selectedBox.classList.remove("selected");
+      selectedBox.style.outline = "";
+    }
+    selectedPronounId = id;
+    selectedBox = box;
+    box.classList.add("selected");
+    box.style.outline = (styleConfig().selectedOutline || "5px solid red");
+  }
+
+  function renderNivel() {
+    selectedNivel = readStoredNivel();
+    if (nivelchip) nivelchip.textContent = "Nivel " + selectedNivel;
+    clearSelection();
+
+    document.querySelectorAll(".box").forEach(box => {
+      const group = box.dataset.group;
+      const role = box.dataset.role;
+      const id = Number(box.dataset.id);
+      const img = box.querySelector("img");
+      if (img) img.src = imagePath(group, id);
+
+      box.onclick = function () {
+        if (group === "pronouns" && role === "expression") {
+          clearSelection();
+          playOne(audioPath("pronouns", id));
+          return;
+        }
+
+        if (group === "pronouns") {
+          selectPronoun(box, id);
+          playOne(audioPath("pronouns", id));
+          return;
+        }
+
+        if (group === "objects") {
+          if (selectedPronounId) {
+            playChain(audioPath("pronouns", selectedPronounId), audioPath("objects", id));
+            clearSelection();
+          } else {
+            playOne(audioPath("objects", id));
+          }
+        }
+      };
+    });
+  }
+
+  function goNivelSelect() {
+    stopAllAudio();
+    window.location.href = "lessonselect.html";
+  }
+
+  function exitProgram() {
+    stopAllAudio();
+    window.location.href = "../quit.html";
+  }
+
+  function nudgeChip() {
+    if (!nivelchip) return;
+    try {
+      nivelchip.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.06)" }, { transform: "scale(1)" }],
+        { duration: 320, easing: "ease-out" }
+      );
+    } catch(e) {}
+  }
+
+  function attachButtonBehavior() {
+    document.addEventListener("click", ev => {
+      const btn = ev.target.closest && ev.target.closest(".buttonz");
+      if (!btn) return;
+
+      const action = btn.dataset.btn;
+
+      if (action === "continue") {
+        if (creditsTransitionLocked) return;
+
+        if (selectedNivel < 20) {
+          saveNivel(selectedNivel + 1);
+          stopAllAudio();
+          runAfterCredits(() => {
+            renderNivel();
+            nudgeChip();
+          });
+        } else {
+          nudgeChip();
+        }
+        return;
+      }
+
+      if (action === "exit") return exitProgram();
+      if (action === "choosel") return goNivelSelect();
+      if (action === "translate") return playOne(translationPath());
+
+      if (action === "goback") {
+        window.location.href = "../lagente.html";
+        return;
+      }
+
+      if (action === "email") {
+        const gmailCompose = "https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com&su=SSB%20Feedback";
+        let win = null;
+        try { win = window.open(gmailCompose, "_blank", "noopener,noreferrer"); } catch(e) { win = null; }
+        if (!win) window.location.href = "mailto:spanishsoundbites@gmail.com?subject=SSB%20Feedback";
+        return;
+      }
+
+      if (action === "help") { window.location.href = "../guide/guidelines.html"; return; }
+      if (action === "donate") return alert("Botón de donación todavía no programado.");
+    }, false);
+  }
+
+  function boot() {
+    const rows = readRequiredRows();
+    const buttons = readRequiredButtons();
+    if (!rows || !buttons) return;
+
+    buildShell(rows, buttons);
+    applyPhoneStyle(styleConfig());
+    renderNivel();
+    attachButtonBehavior();
+  }
+
+  window.addEventListener("pagehide", stopAllAudio);
+  window.addEventListener("beforeunload", stopAllAudio);
+
+  startAfterCredits();
+})();
+</script>
+</body>
+</html>

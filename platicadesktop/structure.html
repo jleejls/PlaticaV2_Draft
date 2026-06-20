@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plática Desktop Structure</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f8ff;
+      color: #111;
+      overflow: hidden;
+    }
+    #structure {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #f0f8ff;
+    }
+    #board {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0.5vh;
+      bottom: 8.7vh;
+      overflow: hidden;
+    }
+    .preview-slot {
+      position: absolute;
+      border: 1px dashed rgba(0,0,0,.18);
+      background: rgba(255,255,255,.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: rgba(0,0,0,.55);
+      overflow: hidden;
+    }
+    .preview-slot.circle {
+      border-radius: 50%;
+    }
+    .notice {
+      position: fixed;
+      left: 14px;
+      top: 10px;
+      background: rgba(255,255,255,.85);
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-weight: 700;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="notice">Plática desktop structure loaded</div>
+  <div id="structure"><div id="board"></div></div>
+
+<script>
+(function () {
+  // New Plática Desktop modular blueprint.
+  // Pronouns and expressions use: group/lesson#/pronouns/images/p#.png
+  // Objects use:                  group/lesson#/objects/images/p#.png
+
+  const desktopSlots = [
+    // Object frames: left column, p1-p5
+    { group: "objects",  id: 1,  role: "object",   x: 2.0,  y: 0.0,  w: 8.2, h: 16.8 },
+    { group: "objects",  id: 2,  role: "object",   x: 2.0,  y: 18.2, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 3,  role: "object",   x: 2.0,  y: 36.4, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 4,  role: "object",   x: 2.0,  y: 54.6, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 5,  role: "object",   x: 2.0,  y: 72.8, w: 8.2, h: 16.8 },
+
+    // Object frames: right column, p6-p10
+    { group: "objects",  id: 6,  role: "object",   x: 89.8, y: 0.0,  w: 8.2, h: 16.8 },
+    { group: "objects",  id: 7,  role: "object",   x: 89.8, y: 18.2, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 8,  role: "object",   x: 89.8, y: 36.4, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 9,  role: "object",   x: 89.8, y: 54.6, w: 8.2, h: 16.8 },
+    { group: "objects",  id: 10, role: "object",   x: 89.8, y: 72.8, w: 8.2, h: 16.8 },
+
+    // Pronoun frames: 3 by 3, p1-p9
+    { group: "pronouns", id: 1,  role: "pronoun",  x: 18.0, y: 0.0,  w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 2,  role: "pronoun",  x: 44.8, y: 0.0,  w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 3,  role: "pronoun",  x: 71.6, y: 0.0,  w: 10.4, h: 22.0 },
+
+    { group: "pronouns", id: 4,  role: "pronoun",  x: 18.0, y: 25.0, w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 5,  role: "pronoun",  x: 44.8, y: 25.0, w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 6,  role: "pronoun",  x: 71.6, y: 25.0, w: 10.4, h: 22.0 },
+
+    { group: "pronouns", id: 7,  role: "pronoun",  x: 18.0, y: 50.0, w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 8,  role: "pronoun",  x: 44.8, y: 50.0, w: 10.4, h: 22.0 },
+    { group: "pronouns", id: 9,  role: "pronoun",  x: 71.6, y: 50.0, w: 10.4, h: 22.0 },
+
+    // Expression circles: pronouns p10-p11, but they do not chain to objects.
+    { group: "pronouns", id: 10, role: "expression", shape: "circle", x: 41.8, y: 75.0, size: 82 },
+    { group: "pronouns", id: 11, role: "expression", shape: "circle", x: 52.0, y: 75.0, size: 82 }
+  ];
+
+  const buttonSlots = [
+    { action: "continue",  img: "../trigger/adelante.png",  alt: "Adelante",  title: "Continuar al siguiente nivel" },
+    { action: "exit",      img: "../trigger/exit.png",      alt: "Exit",      title: "Salir del programa" },
+    { action: "choosel",   img: "../trigger/choosel.png",   alt: "Niveles",   title: "Ir a selección de niveles" },
+    { action: "help",      img: "../trigger/help.png",      alt: "Help",      title: "Guidelines" },
+    { action: "donate",    img: "../trigger/donate.png",    alt: "Donate",    title: "Donar" },
+    { action: "email",     img: "../trigger/email.png",     alt: "Email",     title: "Email information" },
+    { action: "goback",    img: "../trigger/goback.png",    alt: "Back",      title: "Volver" },
+    { action: "translate", img: "../trigger/translate.png", alt: "Translate", title: "Traducir" }
+  ];
+
+  const desktopStyle = {
+    bodyBackground: "#f0f8ff",
+    boardTop: "0.5vh",
+    boardBottom: "8.7vh",
+    buttonBarBottom: "2vh",
+    buttonGap: "0.4vw",
+    buttonWidth: "min(10.5vw, 118px)",
+    buttonHeight: "min(5.2vh, 42px)",
+    buttonMinWidth: "64px",
+    buttonMinHeight: "30px",
+    buttonBackground: "#d05000",
+    nivelCircleRight: "4vw",
+    nivelCircleBottom: "11vh",
+    selectedOutline: "5px solid red"
+  };
+
+  sessionStorage.setItem("desktopSlots", JSON.stringify(desktopSlots));
+  sessionStorage.setItem("buttonSlots", JSON.stringify(buttonSlots));
+  sessionStorage.setItem("desktopStyle", JSON.stringify(desktopStyle));
+  sessionStorage.setItem("platicaMode", "desktop");
+  sessionStorage.setItem("desktopMode", "1");
+  sessionStorage.removeItem("phoneMode");
+
+  const board = document.getElementById("board");
+  desktopSlots.forEach(slot => {
+    const d = document.createElement("div");
+    d.className = "preview-slot" + (slot.shape === "circle" ? " circle" : "");
+    d.style.left = Number(slot.x) + "%";
+    d.style.top = Number(slot.y) + "%";
+    if (slot.shape === "circle") {
+      d.style.width = Number(slot.size) + "px";
+      d.style.height = Number(slot.size) + "px";
+    } else {
+      d.style.width = Number(slot.w) + "%";
+      d.style.height = Number(slot.h) + "%";
+    }
+    d.textContent = slot.role === "expression" ? "P" + slot.id : (slot.group === "objects" ? "O" + slot.id : "P" + slot.id);
+    board.appendChild(d);
+  });
+
+  setTimeout(() => {
+    window.location.href = "lessonselect.html";
+  }, 250);
+})();
+</script>
+</body>
+</html>

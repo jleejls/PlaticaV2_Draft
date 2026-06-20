@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plática Desktop Nivel Select</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{ --gap: 4px; --slot-radius: 14px; --slot-border: 1px solid #ccc; --slot-hover: turquoise; --focus: 2px solid #1976d2; }
+    * { box-sizing: border-box; }
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#f0f8ff; color:#111; line-height:1.35; }
+    #nivel-select{ padding: 20px 16px 28px; max-width: 900px; margin: 0 auto; }
+    #nivel-select h2{ margin: 8px 0 10px; font-size: clamp(1.1rem, 2.6vw, 1.6rem); }
+    #nivel-buttons{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: stretch; }
+    .nav-button{ display:flex; align-items:center; justify-content:center; padding: 12px; border: var(--slot-border); border-radius: var(--slot-radius); background: white; cursor:pointer; font-size: 1rem; font-weight: 600; text-align:center; transition: background .15s ease; }
+    .nav-button:hover{ background: var(--slot-hover); }
+    .nav-button:focus{ outline: var(--focus); }
+    .top-row{ display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-bottom: 8px; }
+    .small-link{ border: 1px solid #aaa; border-radius: 10px; background: #fff; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="nivel-select">
+    <div class="top-row">
+      <h2>Selecciona un nivel:</h2>
+      <button class="small-link" type="button" id="home-button">Home</button>
+    </div>
+    <div id="nivel-buttons"></div>
+  </div>
+<script>
+(function () {
+  const nivelButtonsEl = document.getElementById("nivel-buttons");
+  const homeButton = document.getElementById("home-button");
+
+  const VERBS = [null,"Tener","Querer","Decir","Estar","Necesitar","Ir","Saber","Venir","Comer","Tomar","Hablar","Ver","Ser","Poder","Vivir","Haber","Dar","Poner","Hacer","Quedar"];
+
+  function saveSelectedNivel(n){
+    sessionStorage.setItem("lesson", String(n));
+    sessionStorage.setItem("selectedLesson", String(n));
+    sessionStorage.setItem("currentLesson", String(n));
+    sessionStorage.setItem("nivel", String(n));
+    sessionStorage.setItem("selectedNivel", String(n));
+    sessionStorage.setItem("platicaMode", "desktop");
+    sessionStorage.setItem("desktopMode", "1");
+    sessionStorage.removeItem("phoneMode");
+    if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
+  }
+
+  if (!sessionStorage.getItem("desktopSlots") || !sessionStorage.getItem("buttonSlots")) {
+    window.location.href = "structure.html";
+    return;
+  }
+
+  for(let i = 1; i <= 20; i++){
+    const btn = document.createElement("button");
+    btn.textContent = `Nivel ${i} — ${VERBS[i]}`;
+    btn.className = "nav-button";
+    btn.addEventListener("click", () => {
+      saveSelectedNivel(i);
+      window.location.href = "conductor.html";
+    });
+    nivelButtonsEl.appendChild(btn);
+  }
+
+  homeButton.addEventListener("click", () => { window.location.href = "../index.html"; });
+})();
+</script>
+</body>
+</html>

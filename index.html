@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #57ecf6;
+      color: #333;
+    }
+
+    #container {
+      position: absolute;
+      left: 26vw;
+      top: 27px;
+      background-color: tan;
+      border-radius: 10px;
+      max-width: 180px;
+      padding: 1rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .section {
+      margin: 1rem 0;
+      padding: 0.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    #credits {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      background-color: #fffbea;
+      color: #333;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width:266px;
+    }
+
+    #notice {
+      position: absolute;
+      top: 100px;
+      right: 493px;
+      background-color: #ffd5c2;
+      color: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      width: 248px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .note {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      text-align: center;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div class="section">
+      <h2>Returning Student?</h2>
+      <button onclick="startProgram()">Start</button>
+    </div>
+
+    <div class="section">
+      <h2>First Time Here?</h2>
+      <button onclick="location.href='welcome.html'">Start from the Beginning</button>
+    </div>
+
+    <div class="section">
+      <h2>Come Back Soon</h2>
+      <button onclick="window.location.href='quit.html';">Quit</button>
+    </div>
+  </div>
+
+  <script>
+    function shouldUsePhonePath(){
+      const PHONE_WIDTH_LIMIT = 700;
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get('phone') === '1') return true;
+      if (params.get('desktop') === '1') return false;
+
+      const narrowScreen = window.matchMedia(`(max-width: ${PHONE_WIDTH_LIMIT}px)`).matches;
+      const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      const hasTouch = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
+
+      return narrowScreen && (coarsePointer || hasTouch);
+    }
+
+    function startProgram(){
+      if (shouldUsePhonePath()) {
+        sessionStorage.setItem('phoneMode', '1');
+        sessionStorage.removeItem('desktopMode');
+        window.location.href = './platica_phone/structure.html';
+        return;
+      }
+
+      sessionStorage.setItem('desktopMode', '1');
+      sessionStorage.removeItem('phoneMode');
+      window.location.href = 'platicadesktop/structure.html';
+    }
+  </script>
+</body>
+</html>
