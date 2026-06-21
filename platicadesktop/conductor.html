@@ -127,6 +127,63 @@
       font-size: clamp(1rem, 2.3vw, 1.2rem);
     }
 
+
+    #imageMagnifyOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.28);
+    }
+    #imageMagnifyFrame {
+      position: relative;
+      max-width: 92vw;
+      max-height: 88vh;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 3px solid #4CAF50;
+      border-radius: 18px;
+      box-shadow: 0 10px 32px rgba(0,0,0,.28);
+      cursor: default;
+    }
+    #imageMagnifyClose {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      width: 38px;
+      height: 38px;
+      border: 3px solid white;
+      border-radius: 50%;
+      background: red;
+      color: white;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,.35);
+      z-index: 9001;
+      user-select: none;
+    }
+    #imageMagnifyClose:hover {
+      transform: scale(1.06);
+    }
+    #imageMagnifyFrame img {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 88vw;
+      max-height: 82vh;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
   </style>
 </head>
 <body>
@@ -459,6 +516,14 @@
 
   function attachSlotBehavior() {
     document.querySelectorAll(".slot").forEach(box => {
+      box.addEventListener("contextmenu", ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        const img = box.querySelector("img");
+        if (img && img.src) openImageMagnifier(img.src, img.alt);
+      });
+
       box.addEventListener("click", () => {
         const group = box.dataset.group;
         const role = box.dataset.role;
@@ -485,6 +550,64 @@
           }
         }
       });
+    });
+  }
+
+
+  function closeImageMagnifier() {
+    const overlay = document.getElementById("imageMagnifyOverlay");
+    if (overlay) overlay.remove();
+  }
+
+  function openImageMagnifier(src, alt) {
+    closeImageMagnifier();
+
+    const overlay = document.createElement("div");
+    overlay.id = "imageMagnifyOverlay";
+
+    const frame = document.createElement("div");
+    frame.id = "imageMagnifyFrame";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.id = "imageMagnifyClose";
+    closeBtn.type = "button";
+    closeBtn.title = "Cerrar imagen ampliada";
+    closeBtn.setAttribute("aria-label", "Cerrar imagen ampliada");
+    closeBtn.textContent = "×";
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = alt || "Imagen ampliada";
+
+    frame.appendChild(closeBtn);
+    frame.appendChild(img);
+    overlay.appendChild(frame);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+
+    overlay.addEventListener("contextmenu", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+
+    frame.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+
+    frame.addEventListener("contextmenu", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+
+    closeBtn.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      closeImageMagnifier();
     });
   }
 

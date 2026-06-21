@@ -90,6 +90,43 @@
       z-index: 51;
       user-select: none;
     }
+
+    #creditsOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #f0f8ff;
+      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+    #creditsCard {
+      width: min(92vw, 620px);
+      max-height: 86vh;
+      overflow: auto;
+      background: rgba(255,255,255,.94);
+      border: 2px solid #4CAF50;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+      padding: 22px 26px;
+    }
+    #creditsCard h1 {
+      margin: 0 0 12px;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+    }
+    #creditsCard ul {
+      display: inline-block;
+      margin: 0;
+      padding-left: 1.2em;
+      text-align: left;
+      line-height: 1.55;
+      font-size: clamp(1rem, 2.3vw, 1.2rem);
+    }
+
   </style>
 </head>
 <body>
@@ -99,6 +136,60 @@
   let selectedPronounId = null;
   let selectedBox = null;
   let currentAudio = [];
+  let creditsTransitionLocked = false;
+  let creditsTransitionTimer = null;
+
+  const MINIMUM_CREDITS_DELAY_MS = 2000;
+  const CREDITS_HTML = `<li><strong>Project Assistant:</strong> AJ Cornell</li>
+      <li><strong>Male Voice:</strong> Jimmy Self</li>
+      <li><strong>Female Voice:</strong> Reina Maldonado</li>
+      <li><strong>Actors:</strong></li>
+      <li><strong></strong>-   Jose Garcia</li>
+      <li><strong></strong>-   Susana Mejia</li>
+      <li><strong></strong>-   Maria Flores</li>
+      <li><strong></strong>-   Lucia Garcia</li>
+      <li><strong></strong>-   Roberto Gomez</li>
+      <li><strong></strong>-   Noel Romero</li>
+      <li><strong></strong>-   AJ Cornell</li>`;
+
+  function showCreditsOverlay() {
+    const oldOverlay = document.getElementById("creditsOverlay");
+    if (oldOverlay) oldOverlay.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "creditsOverlay";
+    overlay.setAttribute("aria-live", "polite");
+
+    const card = document.createElement("div");
+    card.id = "creditsCard";
+    card.innerHTML = '<h1>Créditos</h1><ul>' + CREDITS_HTML + '</ul>';
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
+
+  function hideCreditsOverlay() {
+    const overlay = document.getElementById("creditsOverlay");
+    if (overlay) overlay.remove();
+  }
+
+  function runAfterCredits(callback) {
+    if (creditsTransitionLocked) return;
+
+    creditsTransitionLocked = true;
+    showCreditsOverlay();
+    window.clearTimeout(creditsTransitionTimer);
+
+    creditsTransitionTimer = window.setTimeout(() => {
+      hideCreditsOverlay();
+      creditsTransitionLocked = false;
+      if (typeof callback === "function") callback();
+    }, MINIMUM_CREDITS_DELAY_MS);
+  }
+
+  function startAfterCredits() {
+    runAfterCredits(boot);
+  }
 
   function readStoredLesson() {
     const stored =
@@ -427,11 +518,15 @@
       const action = btn.dataset.btn;
 
       if (action === "continue") {
+        if (creditsTransitionLocked) return;
+
         if (selectedLesson < 20) {
           saveLesson(selectedLesson + 1);
           stopAllAudio();
-          fillLessonImages();
-          nudgeChip();
+          runAfterCredits(() => {
+            fillLessonImages();
+            nudgeChip();
+          });
         } else {
           nudgeChip();
         }
@@ -475,7 +570,7 @@
   window.addEventListener("pagehide", stopAllAudio);
   window.addEventListener("beforeunload", stopAllAudio);
 
-  boot();
+  startAfterCredits();
 })();
 </script>
 </body>
