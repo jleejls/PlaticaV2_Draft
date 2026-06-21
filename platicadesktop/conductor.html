@@ -618,7 +618,7 @@
 
   function exitProgram() {
     stopAllAudio();
-    window.location.href = "../quit.html";
+    window.location.href = "../stop.html";
   }
 
   function nudgeChip() {
@@ -631,6 +631,26 @@
         { duration: 320, easing: "ease-out" }
       );
     } catch(e) {}
+  }
+
+
+  function guidePath() {
+    const path = window.location.pathname.replace(/\\/g, "/");
+
+    // If this conductor is inside platicadesktop or platicaphone,
+    // the guide folder should be one level up.
+    if (/(^|\/)(platicadesktop|platicaphone)\//i.test(path)) {
+      return "../guide/guidelines.html";
+    }
+
+    // If this conductor is being run from the repository root,
+    // the guide folder should be directly beside it.
+    return "guide/guidelines.html";
+  }
+
+  function openGuide() {
+    stopAllAudio();
+    window.location.href = guidePath();
   }
 
   function attachButtonBehavior() {
@@ -673,7 +693,7 @@
         return;
       }
 
-      if (action === "help") { window.location.href = "../guide/guidelines.html"; return; }
+      if (action === "help") return openGuide();
       if (action === "donate") return alert("Botón de donación todavía no programado.");
     }, false);
   }
