@@ -16,12 +16,18 @@
     }
     #notice {
       position: fixed;
-      left: 12px;
-      top: 10px;
+      right: 8px;
+      top: 8px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: rgba(255,255,255,.88);
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 7px 11px;
+      border: 1px solid #bbb;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 14px;
       font-weight: 700;
       z-index: 20;
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
@@ -29,7 +35,7 @@
   </style>
 </head>
 <body>
-  <div id="notice">Plática phone structure loaded</div>
+  <div id="notice" aria-label="Nivel actual">1</div>
 <script>
 (function () {
   const storedNivel =
@@ -45,6 +51,9 @@
 
   const n = Number(storedNivel);
   const nivelToUse = Number.isFinite(n) && n >= 1 && n <= 20 ? String(n) : "1";
+
+  const notice = document.getElementById("notice");
+  if (notice) notice.textContent = nivelToUse;
 
   // Keep both the newer Nivel keys and the older lesson keys so older paths still work.
   sessionStorage.setItem("lesson", nivelToUse);
@@ -93,13 +102,22 @@
     bodyBackground: "#f0f8ff",
     boardTop: "0.35vh",
     boardBottom: "8.6vh",
-    boardPadding: "0 1px",
-    rowGap: "0px",
+    boardPadding: "0 3px",
+
+    // Slight horizontal and vertical breathing room between all frames.
+    rowGap: "0.35vh",
+    columnGap: "0.8vw",
+    frameGap: "0.8vw",
     rowMaxWidth: "760px",
-    boxWidth: "min(25.2vw, 13.4vh, 106px)",
-    boxHeight: "min(25.2vw, 13.4vh, 106px)",
-    expressionWidth: "min(22vw, 11.5vh, 92px)",
-    expressionHeight: "min(22vw, 11.5vh, 92px)",
+
+    // Main/person/object frames reduced slightly so the new gaps fit cleanly.
+    boxWidth: "min(23.8vw, 12.6vh, 100px)",
+    boxHeight: "min(23.8vw, 12.6vh, 100px)",
+
+    // Circular expression frames reduced more noticeably.
+    expressionWidth: "min(18.5vw, 9.8vh, 78px)",
+    expressionHeight: "min(18.5vw, 9.8vh, 78px)",
+
     gapHeight: "1.2vh",
     gapMaxHeight: "16px",
     buttonGap: "0.35vh",
@@ -107,8 +125,18 @@
     buttonHeight: "5vh",
     buttonMaxHeight: "44px",
     buttonBackground: "#d05000",
-    chipRight: "3vw",
-    chipBottom: "9.8vh",
+
+    // Level badge: number only, in a small unobtrusive circle.
+    chipTextPrefix: "",
+    chipLabel: "",
+    chipNumberOnly: true,
+    chipRight: "1.2vw",
+    chipTop: "0.8vh",
+    chipBottom: "auto",
+    chipWidth: "28px",
+    chipHeight: "28px",
+    chipBorderRadius: "50%",
+    chipFontSize: "14px",
     selectedOutline: "5px solid red"
   };
 
@@ -117,6 +145,13 @@
   sessionStorage.setItem("phoneLayout", JSON.stringify({ rows: phoneRows, buttons: buttonSlots, style: phoneStyle }));
   sessionStorage.setItem("buttonSlots", JSON.stringify(buttonSlots));
   sessionStorage.setItem("phoneStyle", JSON.stringify(phoneStyle));
+
+  // Tell the receiving page to show only the number, not the word Lesson or Nivel.
+  sessionStorage.setItem("levelBadgeText", nivelToUse);
+  sessionStorage.setItem("nivelBadgeText", nivelToUse);
+  sessionStorage.setItem("levelBadgePrefix", "");
+  sessionStorage.setItem("nivelBadgePrefix", "");
+  sessionStorage.setItem("levelBadgeNumberOnly", "1");
 
   // Keep the phone lane separate from the desktop absolute-slot layout.
   sessionStorage.removeItem("desktopSlots");
