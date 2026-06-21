@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plática Phone Structure</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f8ff;
+      color: #111;
+      overflow: hidden;
+    }
+    #notice {
+      position: fixed;
+      left: 12px;
+      top: 10px;
+      background: rgba(255,255,255,.88);
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-weight: 700;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+  </style>
+</head>
+<body>
+  <div id="notice">Plática phone structure loaded</div>
+<script>
+(function () {
+  const storedNivel =
+    sessionStorage.getItem("selectedNivel") ||
+    sessionStorage.getItem("nivel") ||
+    sessionStorage.getItem("selectedLevel") ||
+    sessionStorage.getItem("level") ||
+    sessionStorage.getItem("currentLevel") ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1";
+
+  const n = Number(storedNivel);
+  const nivelToUse = Number.isFinite(n) && n >= 1 && n <= 20 ? String(n) : "1";
+
+  // Keep both the newer Nivel keys and the older lesson keys so older paths still work.
+  sessionStorage.setItem("lesson", nivelToUse);
+  sessionStorage.setItem("selectedLesson", nivelToUse);
+  sessionStorage.setItem("currentLesson", nivelToUse);
+  sessionStorage.setItem("level", nivelToUse);
+  sessionStorage.setItem("selectedLevel", nivelToUse);
+  sessionStorage.setItem("currentLevel", nivelToUse);
+  sessionStorage.setItem("nivel", nivelToUse);
+  sessionStorage.setItem("selectedNivel", nivelToUse);
+  sessionStorage.setItem("platicaMode", "phone");
+  sessionStorage.setItem("phoneMode", "1");
+  sessionStorage.removeItem("desktopMode");
+  if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
+
+  // PHONE STRUCTURE BLUEPRINT:
+  // This follows the current desktop model:
+  // pronouns/images/p1.png through p9.png are selectable pronoun/person frames.
+  // pronouns/images/p10.png and p11.png are expression frames and do not chain to objects.
+  // objects/images/p1.png through p10.png are object frames.
+  const phoneRows = [
+    { group: "pronouns", role: "pronoun",    columns: 3, ids: [1, 2, 3] },
+    { group: "pronouns", role: "pronoun",    columns: 3, ids: [4, 5, 6] },
+    { group: "pronouns", role: "pronoun",    columns: 3, ids: [7, 8, 9] },
+    { group: "pronouns", role: "expression", columns: 2, ids: [10, 11], shape: "circle" },
+
+    { group: "gap", columns: 0, ids: [], height: "separator" },
+
+    { group: "objects",  role: "object",     columns: 3, ids: [1, 2, 3] },
+    { group: "objects",  role: "object",     columns: 4, ids: [4, 5, 6, 7] },
+    { group: "objects",  role: "object",     columns: 3, ids: [8, 9, 10] }
+  ];
+
+  const buttonSlots = [
+    { action: "continue",  img: "../trigger/adelante.png",  alt: "Adelante",  title: "Continuar al siguiente nivel" },
+    { action: "exit",      img: "../trigger/exit.png",      alt: "Exit",      title: "Salir del programa" },
+    { action: "choosel",   img: "../trigger/choosel.png",   alt: "Niveles",   title: "Ir a selección de niveles" },
+    { action: "help",      img: "../trigger/help.png",      alt: "Help",      title: "Guidelines" },
+    { action: "donate",    img: "../trigger/donate.png",    alt: "Donate",    title: "Donar" },
+    { action: "email",     img: "../trigger/email.png",     alt: "Email",     title: "Email information" },
+    { action: "goback",    img: "../trigger/goback.png",    alt: "Back",      title: "Volver" },
+    { action: "translate", img: "../trigger/translate.png", alt: "Translate", title: "Traducir" }
+  ];
+
+  const phoneStyle = {
+    bodyBackground: "#f0f8ff",
+    boardTop: "0.35vh",
+    boardBottom: "8.6vh",
+    boardPadding: "0 1px",
+    rowGap: "0px",
+    rowMaxWidth: "760px",
+    boxWidth: "min(25.2vw, 13.4vh, 106px)",
+    boxHeight: "min(25.2vw, 13.4vh, 106px)",
+    expressionWidth: "min(22vw, 11.5vh, 92px)",
+    expressionHeight: "min(22vw, 11.5vh, 92px)",
+    gapHeight: "1.2vh",
+    gapMaxHeight: "16px",
+    buttonGap: "0.35vh",
+    buttonWidth: "10.8vw",
+    buttonHeight: "5vh",
+    buttonMaxHeight: "44px",
+    buttonBackground: "#d05000",
+    chipRight: "3vw",
+    chipBottom: "9.8vh",
+    selectedOutline: "5px solid red"
+  };
+
+  sessionStorage.setItem("layoutRows", JSON.stringify(phoneRows));
+  sessionStorage.setItem("phoneLayoutRows", JSON.stringify(phoneRows));
+  sessionStorage.setItem("phoneLayout", JSON.stringify({ rows: phoneRows, buttons: buttonSlots, style: phoneStyle }));
+  sessionStorage.setItem("buttonSlots", JSON.stringify(buttonSlots));
+  sessionStorage.setItem("phoneStyle", JSON.stringify(phoneStyle));
+
+  // Keep the phone lane separate from the desktop absolute-slot layout.
+  sessionStorage.removeItem("desktopSlots");
+  sessionStorage.removeItem("desktopLayout");
+  sessionStorage.removeItem("desktopStyle");
+
+  setTimeout(() => {
+    window.location.href = "lessonselect.html";
+  }, 250);
+})();
+</script>
+</body>
+</html>
