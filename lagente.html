@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The People (La Gente)</title>
+  <style>
+    * {
+      font-size: 1.2rem;
+      font-weight: bold;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #f0f8ff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .box {
+      position: absolute;
+      width: 24vh;
+      height: 24vh;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, outline 0.2s ease;
+      cursor: pointer;
+    }
+
+    .box.selected {
+      outline: 3px solid gold;
+      z-index: 9999;
+    }
+
+    .box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: none !important;
+      transform: none !important;
+      pointer-events: none;
+    }
+
+    button {
+      position: absolute;
+      top: 86vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 9 character/person frames only. Images load from the characters folder. -->
+  <div id="box1" class="box" style="top: 2vh;  left: 12vw;"><img src="./characters/images/p1.png" alt="character 1"></div>
+  <div id="box2" class="box" style="top: 2vh;  left: 37vw;"><img src="./characters/images/p2.png" alt="character 2"></div>
+  <div id="box3" class="box" style="top: 2vh;  left: 62vw;"><img src="./characters/images/p3.png" alt="character 3"></div>
+
+  <div id="box4" class="box" style="top: 29vh; left: 12vw;"><img src="./characters/images/p4.png" alt="character 4"></div>
+  <div id="box5" class="box" style="top: 29vh; left: 37vw;"><img src="./characters/images/p5.png" alt="character 5"></div>
+  <div id="box6" class="box" style="top: 29vh; left: 62vw;"><img src="./characters/images/p6.png" alt="character 6"></div>
+
+  <div id="box7" class="box" style="top: 56vh; left: 12vw;"><img src="./characters/images/p7.png" alt="character 7"></div>
+  <div id="box8" class="box" style="top: 56vh; left: 37vw;"><img src="./characters/images/p8.png" alt="character 8"></div>
+  <div id="box9" class="box" style="top: 56vh; left: 62vw;"><img src="./characters/images/p9.png" alt="character 9"></div>
+
+<button onclick="location.href='./platicadesktop/conductor.html'">Continuar</button> 
+
+  <audio id="player"></audio>
+
+<script>
+  const AUDIO_BASE = './characters/audios/';
+
+  function playAny(n) {
+    const files = [
+      `${AUDIO_BASE}a${n}.m4a`,
+      `${AUDIO_BASE}${n}.m4a`
+    ];
+
+    let i = 0;
+    let audio = new Audio(files[i]);
+
+    audio.onerror = () => {
+      i++;
+      if (i < files.length) {
+        audio = new Audio(files[i]);
+        audio.play().catch(() => {});
+      }
+    };
+
+    audio.play().catch(() => {});
+  }
+
+  // Wire boxes 1–9 only. Box 10 has been removed.
+  for (let n = 1; n <= 9; n++) {
+    const el = document.getElementById('box' + n);
+    if (!el) continue;
+
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+
+    el.addEventListener('click', () => playAny(n));
+
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        playAny(n);
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
