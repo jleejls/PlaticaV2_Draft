@@ -141,6 +141,47 @@
       font-size: clamp(1rem, 2.3vw, 1.2rem);
     }
 
+    .emailOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(0,0,0,.42);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .emailOverlayCard {
+      width: min(90vw, 430px);
+      background: #ffffff;
+      color: #111111;
+      border: 2px solid #4CAF50;
+      border-radius: 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.25);
+      padding: 22px 20px;
+      text-align: center;
+    }
+    .emailOverlayCard h2 {
+      margin: 0 0 12px;
+      font-size: 1.35rem;
+    }
+    .emailOverlayAddress {
+      margin: 12px 0 18px;
+      font-size: 1.12rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .emailOverlayClose {
+      border: 1px solid #777;
+      border-radius: 9px;
+      background: #f4f4f4;
+      color: #111;
+      padding: 9px 16px;
+      font: 15px Arial, Helvetica, sans-serif;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -575,6 +616,55 @@
     } catch(e) {}
   }
 
+
+  function showEmailOverlay() {
+    const existing = document.getElementById("emailOverlay");
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "emailOverlay";
+    overlay.className = "emailOverlay";
+
+    const card = document.createElement("div");
+    card.className = "emailOverlayCard";
+
+    const title = document.createElement("h2");
+    title.textContent = "Contact";
+
+    const line = document.createElement("p");
+    line.textContent = "Email address:";
+
+    const address = document.createElement("div");
+    address.className = "emailOverlayAddress";
+    address.textContent = "spanishsoundbites@gmail.com";
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "emailOverlayClose";
+    close.textContent = "Go Back";
+
+    close.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      overlay.remove();
+    });
+
+    overlay.addEventListener("click", function (ev) {
+      if (ev.target === overlay) overlay.remove();
+    });
+
+    card.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+    });
+
+    card.appendChild(title);
+    card.appendChild(line);
+    card.appendChild(address);
+    card.appendChild(close);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  }
+
   function attachButtonBehavior() {
     document.addEventListener("click", ev => {
       const btn = ev.target.closest && ev.target.closest(".buttonz");
@@ -608,10 +698,7 @@
       }
 
       if (action === "email") {
-        const gmailCompose = "https://mail.google.com/mail/?view=cm&fs=1&to=spanishsoundbites@gmail.com&su=SSB%20Feedback";
-        let win = null;
-        try { win = window.open(gmailCompose, "_blank", "noopener,noreferrer"); } catch(e) { win = null; }
-        if (!win) window.location.href = "mailto:spanishsoundbites@gmail.com?subject=SSB%20Feedback";
+        showEmailOverlay();
         return;
       }
 

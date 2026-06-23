@@ -167,7 +167,48 @@
   sessionStorage.removeItem("desktopLayout");
   sessionStorage.removeItem("desktopStyle");
 
+  const params = new URLSearchParams(window.location.search);
+  const shouldAutoStartLevel1 =
+    params.get("autoStartLevel1") === "1" ||
+    sessionStorage.getItem("autoStartLevel1") === "yes" ||
+    sessionStorage.getItem("firstTimeStart") === "yes";
+
   setTimeout(() => {
+    if (shouldAutoStartLevel1) {
+      const nivel = "1";
+
+      // First-time startup uses this instruction one time only.
+      sessionStorage.setItem("lesson", nivel);
+      sessionStorage.setItem("selectedLesson", nivel);
+      sessionStorage.setItem("currentLesson", nivel);
+      sessionStorage.setItem("level", nivel);
+      sessionStorage.setItem("selectedLevel", nivel);
+      sessionStorage.setItem("currentLevel", nivel);
+      sessionStorage.setItem("nivel", nivel);
+      sessionStorage.setItem("selectedNivel", nivel);
+      sessionStorage.setItem("levelBadgeText", nivel);
+      sessionStorage.setItem("nivelBadgeText", nivel);
+      sessionStorage.setItem("platicaLane", "phone");
+
+      localStorage.setItem("lesson", nivel);
+      localStorage.setItem("selectedLesson", nivel);
+      localStorage.setItem("currentLesson", nivel);
+      localStorage.setItem("level", nivel);
+      localStorage.setItem("selectedLevel", nivel);
+      localStorage.setItem("currentLevel", nivel);
+      localStorage.setItem("nivel", nivel);
+      localStorage.setItem("selectedNivel", nivel);
+      localStorage.setItem("platicaLane", "phone");
+
+      sessionStorage.removeItem("autoStartLevel1");
+      sessionStorage.removeItem("firstTimeStart");
+      localStorage.removeItem("autoStartLevel1");
+      localStorage.removeItem("firstTimeStart");
+
+      window.location.href = "conductor.html?lesson=1&prep=" + Date.now();
+      return;
+    }
+
     window.location.href = "lessonselect.html";
   }, 250);
 })();
