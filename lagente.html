@@ -8,29 +8,21 @@
     * {
       font-size: 1.2rem;
       font-weight: bold;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
     }
 
     body {
       margin: 0;
-      overflow: hidden;
-      background: #f0f8ff;
-      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
     }
 
     .box {
       position: absolute;
-      width: 24vh;
-      height: 24vh;
       border-radius: 20px;
       overflow: hidden;
       transition: box-shadow 0.2s ease, outline 0.2s ease;
-      cursor: pointer;
     }
 
     .box.selected {
@@ -42,17 +34,31 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      display: block;
       transition: none !important;
       transform: none !important;
-      pointer-events: none;
+    }
+
+    .button-bar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .rounded-box {
+      width: 300px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      border-radius: 20px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      font-family: sans-serif;
     }
 
     button {
-      position: absolute;
-      top: 86vh;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 18px;
       background-color: #007BFF;
       color: white;
@@ -66,56 +72,180 @@
 </head>
 <body>
 
-  <!-- 9 character/person frames only. Images load from the characters folder. -->
-  <div id="box1" class="box" style="top: 2vh;  left: 12vw;"><img src="./characters/images/p1.png" alt="character 1"></div>
-  <div id="box2" class="box" style="top: 2vh;  left: 37vw;"><img src="./characters/images/p2.png" alt="character 2"></div>
-  <div id="box3" class="box" style="top: 2vh;  left: 62vw;"><img src="./characters/images/p3.png" alt="character 3"></div>
+  <!-- 7 interactive boxes with images -->
+  <div id="box1" class="box" style="top: 8vh; left: 12vw; width: 24vh; height: 24vh;"><img src="./characters/images/p1.png" alt="2"></div>
+  <div id="box2" class="box" style="top: 8vh; left: 37vw; width: 24vh; height: 24vh;"><img src="./characters/images/p2.png" alt="2"></div>
+  <div id="box3" class="box" style="top: 8vh; left: 58vw; width: 24vh; height: 24vh;"><img src="./characters/images/p3.png" alt="3"></div>
+  <div id="box4" class="box" style="top: 8vh; left: 75vw; width: 24vh; height: 24vh;"><img src="./characters/images/p4.png" alt="4"></div>
+  <div id="box5" class="box" style="top: 49vh; left: 12vw; width: 24vh; height: 24vh;"><img src="./characters/images/p5.png" alt="5"></div>
+  <div id="box6" class="box" style="top: 49vh; left: 37vw; width: 24vh; height: 24vh;"><img src="./characters/images/p6.png" alt="6"></div>
+  <div id="box7" class="box" style="top: 49vh; left: 58vw; width: 24vh; height: 24vh;"><img src="./characters/images/p7.png" alt="7"></div>
+  
 
-  <div id="box4" class="box" style="top: 29vh; left: 12vw;"><img src="./characters/images/p4.png" alt="character 4"></div>
-  <div id="box5" class="box" style="top: 29vh; left: 37vw;"><img src="./characters/images/p5.png" alt="character 5"></div>
-  <div id="box6" class="box" style="top: 29vh; left: 62vw;"><img src="./characters/images/p6.png" alt="character 6"></div>
-
-  <div id="box7" class="box" style="top: 56vh; left: 12vw;"><img src="./characters/images/p7.png" alt="character 7"></div>
-  <div id="box8" class="box" style="top: 56vh; left: 37vw;"><img src="./characters/images/p8.png" alt="character 8"></div>
-  <div id="box9" class="box" style="top: 56vh; left: 62vw;"><img src="./characters/images/p9.png" alt="character 9"></div>
-
-<button onclick="location.href='./platicadesktop/conductor.html'">Continuar</button> 
+  <!-- Return button (English) -->
+  <div style="text-align: center; margin-top: 10px;">
+    <button onclick="returnToConductor()" style="position:absolute;top:83vh;">
+      Continuar
+    </button>
+  </div>
 
   <audio id="player"></audio>
 
 <script>
-  const AUDIO_BASE = './characters/audios/';
+  // La Gente has two different jobs:
+  // 1) Normal lesson use: return to the exact conductor page that opened La Gente.
+  // 2) First-time use: carry the welcome-page instruction to structure.html,
+  //    so structure prepares Level 1 and skips lessonselect.html.
+  function getSavedLessonNumber() {
+    const params = new URLSearchParams(window.location.search);
+    const rawLesson =
+      params.get("lesson") ||
+      sessionStorage.getItem("lesson") ||
+      sessionStorage.getItem("selectedLesson") ||
+      sessionStorage.getItem("currentLesson") ||
+      localStorage.getItem("lesson") ||
+      localStorage.getItem("selectedLesson") ||
+      localStorage.getItem("currentLesson") ||
+      "1";
+
+    const n = Number(rawLesson);
+    return Number.isFinite(n) && n > 0 ? String(n) : "1";
+  }
+
+  function isFirstTimeStart(params) {
+    return params.get("firstTime") === "1" ||
+      params.get("autoStartLevel1") === "1" ||
+      sessionStorage.getItem("firstTimeStart") === "yes" ||
+      sessionStorage.getItem("autoStartLevel1") === "yes" ||
+      localStorage.getItem("firstTimeStart") === "yes" ||
+      localStorage.getItem("autoStartLevel1") === "yes";
+  }
+
+  function getLane(params) {
+    const rawLane =
+      params.get("lane") ||
+      sessionStorage.getItem("inglesyaLane") ||
+      localStorage.getItem("inglesyaLane") ||
+      sessionStorage.getItem("platicaLane") ||
+      localStorage.getItem("platicaLane") ||
+      (window.innerWidth < 700 ? "phone" : "desktop");
+
+    return rawLane === "phone" ? "phone" : "desktop";
+  }
+
+  function storeLessonOneForFirstTime(lane) {
+    const lesson = "1";
+
+    // First-time path must not use an old conductor return address.
+    sessionStorage.removeItem("lagenteReturnHref");
+    localStorage.removeItem("lagenteReturnHref");
+
+    sessionStorage.setItem("firstTimeStart", "yes");
+    sessionStorage.setItem("autoStartLevel1", "yes");
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
+    sessionStorage.setItem("platicaLane", lane);
+    sessionStorage.setItem("inglesyaLane", lane);
+
+    localStorage.setItem("firstTimeStart", "yes");
+    localStorage.setItem("autoStartLevel1", "yes");
+    localStorage.setItem("lesson", lesson);
+    localStorage.setItem("selectedLesson", lesson);
+    localStorage.setItem("currentLesson", lesson);
+    localStorage.setItem("platicaLane", lane);
+    localStorage.setItem("inglesyaLane", lane);
+  }
+
+  function goToFirstTimeStructure(params) {
+    const lane = getLane(params);
+    storeLessonOneForFirstTime(lane);
+
+    const structurePath = lane === "phone"
+      ? "./platicaphone/structure.html"
+      : "./platicadesktop/structure.html";
+
+    window.location.href = structurePath + "?autoStartLevel1=1&lesson=1";
+  }
+
+  function returnToConductor() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (isFirstTimeStart(params)) {
+      goToFirstTimeStructure(params);
+      return;
+    }
+
+    const lesson = getSavedLessonNumber();
+
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
+    localStorage.setItem("lesson", lesson);
+    localStorage.setItem("selectedLesson", lesson);
+    localStorage.setItem("currentLesson", lesson);
+
+    // Best path: return to the exact conductor page that opened La Gente.
+    // This avoids guessing folder names.
+    const exactReturn =
+      params.get("returnHref") ||
+      sessionStorage.getItem("lagenteReturnHref") ||
+      localStorage.getItem("lagenteReturnHref");
+
+    if (exactReturn) {
+      try {
+        const url = new URL(exactReturn, window.location.href);
+        url.searchParams.set("lesson", lesson);
+        url.searchParams.set("prep", Date.now());
+        window.location.href = url.href;
+        return;
+      } catch (e) {
+        console.log("Could not use exact La Gente return path:", e);
+      }
+    }
+
+    // Emergency fallback only. Normal conductor use should use exactReturn above.
+    const requestedReturn = params.get("return") || localStorage.getItem("platicaLane") || localStorage.getItem("inglesyaLane") || "desktop";
+    const conductorPath = requestedReturn === "phone"
+      ? "./platicaphone/conductor.html"
+      : "./platicadesktop/conductor.html";
+
+    window.location.href = conductorPath + "?lesson=" + encodeURIComponent(lesson) + "&prep=" + Date.now();
+  }
+</script>
+
+<script>
+  const AUDIO_BASE = './characters/audio/';
 
   function playAny(n) {
     const files = [
-      `${AUDIO_BASE}a${n}.m4a`,
-      `${AUDIO_BASE}${n}.m4a`
+      `${AUDIO_BASE}a${n}.m4a`,  // preferred lowercase extension
+      `${AUDIO_BASE}${n}.mp3`,  // fallback
+      `${AUDIO_BASE}${n}.wav`   // optional extra fallback
     ];
 
     let i = 0;
-    let audio = new Audio(files[i]);
+    let a = new Audio(files[i]);
 
-    audio.onerror = () => {
+    a.onerror = () => {
       i++;
       if (i < files.length) {
-        audio = new Audio(files[i]);
-        audio.play().catch(() => {});
+        a = new Audio(files[i]);  // recreate with next file
+        a.play().catch(() => {});
       }
     };
 
-    audio.play().catch(() => {});
+    a.play().catch(() => {});
   }
 
-  // Wire boxes 1–9 only. Box 10 has been removed.
-  for (let n = 1; n <= 9; n++) {
+  // Wire boxes 1–10 → play 1–10 from folder
+  for (let n = 1; n <= 7; n++) {
     const el = document.getElementById('box' + n);
     if (!el) continue;
-
+    el.style.cursor = 'pointer';
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
-
     el.addEventListener('click', () => playAny(n));
-
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -124,6 +254,6 @@
     });
   }
 </script>
-
+  
 </body>
 </html>
