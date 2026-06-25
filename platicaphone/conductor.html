@@ -599,44 +599,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
     }
   })();
 
-  // IMPORTANT: phone conductor sits inside ingles_phone.
-  // group is one folder above ingles_phone, so we use ../group
+  // IMPORTANT: phone conductor sits inside platicaphone.
+  // group is one folder above platicaphone, so we use ../group
   const basePath = `../group/lesson${lesson}`;
   document.getElementById("banner").textContent = `Phone — Lesson ${lesson}`;
   document.getElementById("lessonNumberBadge").textContent = String(lesson);
 
-  // ----- Paths -----
-  // Supports both folder styles:
-  // 1) older split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
-  // 2) newer single folders: image and sound
-  const pronImg = i => [
-    `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`,
-    `${basePath}/pronouns/images/p${i}.jpg`,
-    `${basePath}/pronouns/images/img_${i}.jpg`,
-    `${basePath}/pronouns/image/p${i}.jpg`
-  ];
+  // ----- Exact fast-clean paths -----
+  // Match the proven desktop conductor path. No fallback image searching.
+  const pronImg = i => `${basePath}/pronouns/images/p${i}.jpg`;
+  const objImg = i => `${basePath}/objects/images/p${i}.jpg`;
 
-  const objImg = i => [
-    `${basePath}/image/p${i}.jpg`,
-    `${basePath}/image/o${i}.jpg`,
-    `${basePath}/objects/images/p${i}.jpg`,
-    `${basePath}/objects/images/img_${i}.jpg`,
-    `${basePath}/objects/image/o${i}.jpg`,
-    `${basePath}/image/p${i + 9}.jpg`,
-    `${basePath}/image/p${i + 10}.jpg`
-  ];
-
-  const pronAud = i => [
-    `${basePath}/pronouns/audios/a${i}.m4a`,
-    `${basePath}/sound/${i + 10}.m4a`,
-    `${basePath}/sound/${i}.m4a`
-  ];
-
-  const objAud = i => [
-    `${basePath}/objects/audios/a${i}.m4a`,
-    `${basePath}/sound/${i}.m4a`
-  ];
+  const pronAud = i => `${basePath}/pronouns/audios/a${i}.m4a`;
+  const objAud = i => `${basePath}/objects/audios/a${i}.m4a`;
 
   // ----- Conversation-circle audio paths -----
   // Francisco uses the first expression circle, Rachel uses the second.
@@ -685,34 +660,15 @@ for (let i = 0; i < sessionStorage.length; i++) {
   }
 
   // ----- Tile builder -----
-  function jpgOnlyPath(src) {
-    return String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
-  }
-
-  function expandImageSources(srcList) {
-    const rawSources = Array.isArray(srcList) ? srcList : [srcList];
-    const expanded = [];
-
-    rawSources.forEach(src => {
-      const value = String(src || "");
-      if (!value) return;
-      expanded.push(value);
-      expanded.push(jpgOnlyPath(value));
-      expanded.push(value.replace(/\.jpg(?=([?#]|$))/i, ".png"));
-    });
-
-    return expanded.filter((src, index, arr) => arr.indexOf(src) === index);
-  }
-
-  function makeTile(srcList, fallbackLabel, extraClass){
-    const sources = expandImageSources(srcList);
-    let srcIndex = 0;
-
+  function makeTile(src, fallbackLabel, extraClass){
     const d = document.createElement("div");
     d.className = extraClass ? `tile ${extraClass}` : "tile";
 
     const img = document.createElement("img");
     img.alt = fallbackLabel;
+    img.loading = "eager";
+    img.decoding = "async";
+    img.fetchPriority = "high";
 
     function markTileReady(){
       d.dataset.ready = "yes";
@@ -721,16 +677,12 @@ for (let i = 0; i < sessionStorage.length; i++) {
     img.onload = markTileReady;
 
     img.onerror = () => {
-      srcIndex += 1;
-      if (srcIndex < sources.length) {
-        img.src = sources[srcIndex];
-      } else {
-        d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
-        markTileReady();
-      }
+      console.warn("Missing lesson image:", fallbackLabel, src);
+      d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
+      markTileReady();
     };
 
-    img.src = sources[srcIndex];
+    img.src = src;
     d.appendChild(img);
     return d;
   }

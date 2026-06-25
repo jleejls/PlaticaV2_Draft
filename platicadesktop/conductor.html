@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plática Desktop Conductor</title>
+  <title>Plática Desktop Conductor - Fast Clean</title>
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -196,7 +196,7 @@
   let creditsTransitionLocked = false;
   let creditsTransitionTimer = null;
 
-  const MINIMUM_CREDITS_DELAY_MS = 2000;
+  const MINIMUM_CREDITS_DELAY_MS = 2000; // Two-second opening delay
   const CREDITS_HTML = `<li><strong>Project Assistant:</strong> AJ Cornell</li>
       <li><strong>Male Voice:</strong> Jimmy Self</li>
       <li><strong>Female Voice:</strong> Reina Maldonado</li>
@@ -402,6 +402,9 @@
 
       const img = document.createElement("img");
       img.alt = (slot.role || slot.group) + " " + slot.id;
+      img.loading = "eager";
+      img.decoding = "async";
+      img.fetchPriority = "high";
       box.appendChild(img);
       board.appendChild(box);
     });
@@ -435,58 +438,31 @@
     return "../group/lesson" + selectedLesson;
   }
 
-  function addPngFallbacks(paths) {
-    const out = [];
-    paths.forEach(path => {
-      out.push(path);
-      out.push(String(path).replace(/\.jpg(?=([?#]|$))/i, ".png"));
-    });
-    return out.filter((path, index, arr) => arr.indexOf(path) === index);
-  }
-
-  function imageCandidates(group, id) {
+  function imagePath(group, id) {
+    // Fast-clean exact desktop paths.
+    // This conductor lives in /platicadesktop/, so ../group/lessonN is the lesson root.
     const root = lessonRoot();
     const n = Number(id);
 
     if (group === "pronouns") {
-      return addPngFallbacks([
-        root + "/pronouns/images/p" + n + ".jpg",
-        root + "/pronouns/images/img_" + n + ".jpg",
-        root + "/pronouns/image/p" + n + ".jpg",
-        root + "/image/p" + (n + 10) + ".jpg",
-        root + "/image/p" + n + ".jpg"
-      ]);
+      return root + "/pronouns/images/p" + n + ".jpg";
     }
 
     if (group === "objects") {
-      return addPngFallbacks([
-        root + "/objects/images/p" + n + ".jpg",
-        root + "/objects/images/img_" + n + ".jpg",
-        root + "/objects/image/o" + n + ".jpg",
-        root + "/image/p" + n + ".jpg",
-        root + "/image/o" + n + ".jpg",
-        root + "/image/p" + (n + 9) + ".jpg",
-        root + "/image/p" + (n + 10) + ".jpg"
-      ]);
+      return root + "/objects/images/p" + n + ".jpg";
     }
 
-    return addPngFallbacks([root + "/" + group + "/images/p" + n + ".jpg"]);
+    return root + "/" + group + "/images/p" + n + ".jpg";
   }
 
-  function setImageWithFallback(img, srcList, label) {
-    const sources = Array.isArray(srcList) ? srcList : [srcList];
-    let srcIndex = 0;
-
+  function setImageExact(img, src, label) {
     img.onerror = () => {
-      srcIndex += 1;
-      if (srcIndex < sources.length) {
-        img.src = sources[srcIndex];
-      } else {
-        console.warn("Missing lesson image:", label || img.alt, sources);
-      }
+      console.warn("Missing lesson image:", label || img.alt, src);
     };
 
-    img.src = sources[srcIndex];
+    if (img.getAttribute("src") !== src) {
+      img.src = src;
+    }
   }
 
   function audioPath(group, id) {
@@ -564,7 +540,7 @@
       const group = box.dataset.group;
       const id = Number(box.dataset.id);
       const img = box.querySelector("img");
-      if (img) setImageWithFallback(img, imageCandidates(group, id), group + " " + id);
+      if (img) setImageExact(img, imagePath(group, id), group + " " + id);
     });
   }
 
@@ -720,10 +696,8 @@
         if (selectedLesson < 20) {
           saveLesson(selectedLesson + 1);
           stopAllAudio();
-          runAfterCredits(() => {
-            fillLessonImages();
-            nudgeChip();
-          });
+          fillLessonImages();
+          nudgeChip();
         } else {
           nudgeChip();
         }
