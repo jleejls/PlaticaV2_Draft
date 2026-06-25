@@ -368,6 +368,10 @@
     });
   }
 
+  function jpgOnlyPath(src) {
+    return String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
+  }
+
   function buildShell(slots, buttons) {
     document.body.innerHTML = "";
 
@@ -412,7 +416,7 @@
       b.title = btn.title;
 
       const img = document.createElement("img");
-      img.src = btn.img;
+      img.src = jpgOnlyPath(btn.img);
       img.alt = btn.alt || btn.title;
       b.appendChild(img);
       pbar.appendChild(b);
@@ -432,7 +436,7 @@
   }
 
   function imagePath(group, id) {
-    return lessonRoot() + "/" + group + "/images/p" + id + ".png?v=" + Date.now();
+    return lessonRoot() + "/" + group + "/images/p" + id + ".jpg";
   }
 
   function audioPath(group, id) {

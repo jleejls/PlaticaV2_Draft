@@ -457,28 +457,28 @@ for (let i = 0; i < sessionStorage.length; i++) {
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Continuar / next lesson">
-    <img src="../trigger/adelante.png" alt="Adelante">
+    <img src="../trigger/adelante.jpg" alt="Adelante">
   </div>
   <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
-    <img src="../trigger/exit.png" alt="Exit">
+    <img src="../trigger/exit.jpg" alt="Exit">
   </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
-    <img src="../trigger/choosel.png" alt="Choose lesson">
+    <img src="../trigger/choosel.jpg" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
-    <img src="../trigger/help.png" alt="Help">
+    <img src="../trigger/help.jpg" alt="Help">
   </div>
   <div class="buttonz" data-btn="donate" title="Donate">
-    <img src="../trigger/donate.png" alt="Donate">
+    <img src="../trigger/donate.jpg" alt="Donate">
   </div>
     <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.png" alt="Email">
+    <img src="../trigger/email.jpg" alt="Email">
   </div>
   <div class="buttonz" data-btn="lagente" title="La Gente">
-    <img src="../trigger/lagente.png" alt="La Gente">
+    <img src="../trigger/lagente.jpg" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
-    <img src="../trigger/translate.png" alt="Translate">
+    <img src="../trigger/translate.jpg" alt="Translate">
   </div>
 </div>
 
@@ -599,8 +599,8 @@ for (let i = 0; i < sessionStorage.length; i++) {
     }
   })();
 
-  // IMPORTANT: phone conductor sits inside ingles_phone.
-  // group is one folder above ingles_phone, so we use ../group
+  // IMPORTANT: phone conductor sits inside platicaphone.
+  // group is one folder above platicaphone, so we use ../group
   const basePath = `../group/lesson${lesson}`;
   document.getElementById("banner").textContent = `Phone — Lesson ${lesson}`;
   document.getElementById("lessonNumberBadge").textContent = String(lesson);
@@ -610,19 +610,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 1) older split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
   // 2) newer single folders: image and sound
   const pronImg = i => [
-    `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`,
     `${basePath}/pronouns/images/p${i}.jpg`,
     `${basePath}/pronouns/images/img_${i}.jpg`,
-    `${basePath}/pronouns/image/p${i}.jpg`
+    `${basePath}/pronouns/image/p${i}.jpg`,
+    `${basePath}/image/p${i + 10}.jpg`,
+    `${basePath}/image/p${i}.jpg`
   ];
 
   const objImg = i => [
-    `${basePath}/image/p${i}.jpg`,
-    `${basePath}/image/o${i}.jpg`,
     `${basePath}/objects/images/p${i}.jpg`,
     `${basePath}/objects/images/img_${i}.jpg`,
     `${basePath}/objects/image/o${i}.jpg`,
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/image/o${i}.jpg`,
     `${basePath}/image/p${i + 9}.jpg`,
     `${basePath}/image/p${i + 10}.jpg`
   ];
@@ -641,8 +641,8 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // ----- Conversation-circle audio paths -----
   // Francisco uses the first expression circle, Rachel uses the second.
   // One click on either circle plays one two-part exchange, then stops.
-  const FRANCISCO_EXPRESSION_ID = expressionSlots[0]?.id || exprIds[0] || 8;
-  const RACHEL_EXPRESSION_ID = expressionSlots[1]?.id || exprIds[1] || 9;
+  const FRANCISCO_EXPRESSION_ID = (expressionSlots[0] && expressionSlots[0].id) || exprIds[0] || 8;
+  const RACHEL_EXPRESSION_ID = (expressionSlots[1] && expressionSlots[1].id) || exprIds[1] || 9;
 
   function conversationAud(speaker, role, number){
     const shortSpeaker = speaker === "francisco" ? "f" : "r";
@@ -685,8 +685,12 @@ for (let i = 0; i < sessionStorage.length; i++) {
   }
 
   // ----- Tile builder -----
+  function jpgOnlyPath(src) {
+    return String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
+  }
+
   function makeTile(srcList, fallbackLabel, extraClass){
-    const sources = Array.isArray(srcList) ? srcList : [srcList];
+    const sources = (Array.isArray(srcList) ? srcList : [srcList]).map(jpgOnlyPath);
     let srcIndex = 0;
 
     const d = document.createElement("div");
