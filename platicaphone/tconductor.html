@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Plática Phone Conductor - Final Clean</title>
+<title>Phone Conductor</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <style>
   *{ box-sizing:border-box; }
@@ -412,6 +412,11 @@
   }
 })();
 
+console.log("=== PHONE CONDUCTOR STORAGE CHECK ===");
+for (let i = 0; i < sessionStorage.length; i++) {
+  const key = sessionStorage.key(i);
+  console.log(key, "=", sessionStorage.getItem(key));
+}
 </script>
 </head>
 
@@ -600,61 +605,10 @@
   document.getElementById("banner").textContent = `Phone — Lesson ${lesson}`;
   document.getElementById("lessonNumberBadge").textContent = String(lesson);
 
-  // ----- Final phone image paths -----
-  // Keep audio exact because audio is already working.
-  // Keep images resilient because the phone lane may be opened from slightly
-  // different entry points while testing from structure.html or phone pages.
-  const imageRoots = [
-    `../group/lesson${lesson}`,
-    `../../group/lesson${lesson}`,
-    `group/lesson${lesson}`
-  ];
-
-  function imageExtensions(path){
-    const value = String(path || "");
-    if (!value) return [];
-
-    return [
-      value,
-      value.replace(/\.jpg(?=([?#]|$))/i, ".png"),
-      value.replace(/\.jpg(?=([?#]|$))/i, ".jpeg")
-    ];
-  }
-
-  function uniquePaths(paths){
-    return paths.filter((path, index, arr) => path && arr.indexOf(path) === index);
-  }
-
-  function imageCandidates(makePathsForRoot){
-    const paths = [];
-
-    imageRoots.forEach(root => {
-      makePathsForRoot(root).forEach(path => {
-        paths.push(...imageExtensions(path));
-      });
-    });
-
-    return uniquePaths(paths);
-  }
-
-  const pronImg = i => imageCandidates(root => [
-    `${root}/pronouns/images/p${i}.jpg`,
-    `${root}/pronouns/images/img_${i}.jpg`,
-    `${root}/pronouns/image/p${i}.jpg`,
-    `${root}/image/p${i + 10}.jpg`,
-    `${root}/image/p${i}.jpg`
-  ]);
-
-  const objImg = i => imageCandidates(root => [
-    `${root}/objects/images/p${i}.jpg`,
-    `${root}/objects/images/img_${i}.jpg`,
-    `${root}/objects/image/p${i}.jpg`,
-    `${root}/objects/image/o${i}.jpg`,
-    `${root}/image/p${i}.jpg`,
-    `${root}/image/o${i}.jpg`,
-    `${root}/image/p${i + 9}.jpg`,
-    `${root}/image/p${i + 10}.jpg`
-  ]);
+  // ----- Exact fast-clean paths -----
+  // Match the proven desktop conductor path. No fallback image searching.
+  const pronImg = i => `${basePath}/pronouns/images/p${i}.jpg`;
+  const objImg = i => `${basePath}/objects/images/p${i}.jpg`;
 
   const pronAud = i => `${basePath}/pronouns/audios/a${i}.m4a`;
   const objAud = i => `${basePath}/objects/audios/a${i}.m4a`;
@@ -706,10 +660,7 @@
   }
 
   // ----- Tile builder -----
-  function makeTile(srcList, fallbackLabel, extraClass){
-    const sources = Array.isArray(srcList) ? srcList : [srcList];
-    let srcIndex = 0;
-
+  function makeTile(src, fallbackLabel, extraClass){
     const d = document.createElement("div");
     d.className = extraClass ? `tile ${extraClass}` : "tile";
 
@@ -726,17 +677,12 @@
     img.onload = markTileReady;
 
     img.onerror = () => {
-      srcIndex += 1;
-      if (srcIndex < sources.length) {
-        img.src = sources[srcIndex];
-      } else {
-        console.warn("Missing lesson image:", fallbackLabel, sources);
-        d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
-        markTileReady();
-      }
+      console.warn("Missing lesson image:", fallbackLabel, src);
+      d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
+      markTileReady();
     };
 
-    img.src = sources[srcIndex];
+    img.src = src;
     d.appendChild(img);
     return d;
   }
@@ -837,6 +783,17 @@
   foot.className = "foot";
   foot.textContent = `tense=${tense}  lesson=${lesson}  P=${pronounSlots.length}  O=${objectSlots.length}  E=${expressionSlots.length}`;
   document.body.appendChild(foot);
+
+  console.log("=== PHONE CONDUCTOR RECEIVED STRUCTURE ===", {
+    lesson,
+    tense,
+    phoneLayoutConfig,
+    pronounSlots,
+    objectSlots,
+    expressionSlots,
+    expressionPronounIds: exprIds,
+    layoutRows
+  });
 
   // ----- Audio logic: no overlaps, serial uniting -----
   const player = document.getElementById("player");
