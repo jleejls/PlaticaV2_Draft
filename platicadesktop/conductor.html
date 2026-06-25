@@ -435,8 +435,58 @@
     return "../group/lesson" + selectedLesson;
   }
 
-  function imagePath(group, id) {
-    return lessonRoot() + "/" + group + "/images/p" + id + ".jpg";
+  function addPngFallbacks(paths) {
+    const out = [];
+    paths.forEach(path => {
+      out.push(path);
+      out.push(String(path).replace(/\.jpg(?=([?#]|$))/i, ".png"));
+    });
+    return out.filter((path, index, arr) => arr.indexOf(path) === index);
+  }
+
+  function imageCandidates(group, id) {
+    const root = lessonRoot();
+    const n = Number(id);
+
+    if (group === "pronouns") {
+      return addPngFallbacks([
+        root + "/pronouns/images/p" + n + ".jpg",
+        root + "/pronouns/images/img_" + n + ".jpg",
+        root + "/pronouns/image/p" + n + ".jpg",
+        root + "/image/p" + (n + 10) + ".jpg",
+        root + "/image/p" + n + ".jpg"
+      ]);
+    }
+
+    if (group === "objects") {
+      return addPngFallbacks([
+        root + "/objects/images/p" + n + ".jpg",
+        root + "/objects/images/img_" + n + ".jpg",
+        root + "/objects/image/o" + n + ".jpg",
+        root + "/image/p" + n + ".jpg",
+        root + "/image/o" + n + ".jpg",
+        root + "/image/p" + (n + 9) + ".jpg",
+        root + "/image/p" + (n + 10) + ".jpg"
+      ]);
+    }
+
+    return addPngFallbacks([root + "/" + group + "/images/p" + n + ".jpg"]);
+  }
+
+  function setImageWithFallback(img, srcList, label) {
+    const sources = Array.isArray(srcList) ? srcList : [srcList];
+    let srcIndex = 0;
+
+    img.onerror = () => {
+      srcIndex += 1;
+      if (srcIndex < sources.length) {
+        img.src = sources[srcIndex];
+      } else {
+        console.warn("Missing lesson image:", label || img.alt, sources);
+      }
+    };
+
+    img.src = sources[srcIndex];
   }
 
   function audioPath(group, id) {
@@ -514,7 +564,7 @@
       const group = box.dataset.group;
       const id = Number(box.dataset.id);
       const img = box.querySelector("img");
-      if (img) img.src = imagePath(group, id);
+      if (img) setImageWithFallback(img, imageCandidates(group, id), group + " " + id);
     });
   }
 

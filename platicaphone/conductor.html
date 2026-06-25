@@ -599,8 +599,8 @@ for (let i = 0; i < sessionStorage.length; i++) {
     }
   })();
 
-  // IMPORTANT: phone conductor sits inside platicaphone.
-  // group is one folder above platicaphone, so we use ../group
+  // IMPORTANT: phone conductor sits inside ingles_phone.
+  // group is one folder above ingles_phone, so we use ../group
   const basePath = `../group/lesson${lesson}`;
   document.getElementById("banner").textContent = `Phone — Lesson ${lesson}`;
   document.getElementById("lessonNumberBadge").textContent = String(lesson);
@@ -610,19 +610,19 @@ for (let i = 0; i < sessionStorage.length; i++) {
   // 1) older split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
   // 2) newer single folders: image and sound
   const pronImg = i => [
+    `${basePath}/image/p${i + 10}.jpg`,
+    `${basePath}/image/p${i}.jpg`,
     `${basePath}/pronouns/images/p${i}.jpg`,
     `${basePath}/pronouns/images/img_${i}.jpg`,
-    `${basePath}/pronouns/image/p${i}.jpg`,
-    `${basePath}/image/p${i + 10}.jpg`,
-    `${basePath}/image/p${i}.jpg`
+    `${basePath}/pronouns/image/p${i}.jpg`
   ];
 
   const objImg = i => [
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/image/o${i}.jpg`,
     `${basePath}/objects/images/p${i}.jpg`,
     `${basePath}/objects/images/img_${i}.jpg`,
     `${basePath}/objects/image/o${i}.jpg`,
-    `${basePath}/image/p${i}.jpg`,
-    `${basePath}/image/o${i}.jpg`,
     `${basePath}/image/p${i + 9}.jpg`,
     `${basePath}/image/p${i + 10}.jpg`
   ];
@@ -689,8 +689,23 @@ for (let i = 0; i < sessionStorage.length; i++) {
     return String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
   }
 
+  function expandImageSources(srcList) {
+    const rawSources = Array.isArray(srcList) ? srcList : [srcList];
+    const expanded = [];
+
+    rawSources.forEach(src => {
+      const value = String(src || "");
+      if (!value) return;
+      expanded.push(value);
+      expanded.push(jpgOnlyPath(value));
+      expanded.push(value.replace(/\.jpg(?=([?#]|$))/i, ".png"));
+    });
+
+    return expanded.filter((src, index, arr) => arr.indexOf(src) === index);
+  }
+
   function makeTile(srcList, fallbackLabel, extraClass){
-    const sources = (Array.isArray(srcList) ? srcList : [srcList]).map(jpgOnlyPath);
+    const sources = expandImageSources(srcList);
     let srcIndex = 0;
 
     const d = document.createElement("div");
