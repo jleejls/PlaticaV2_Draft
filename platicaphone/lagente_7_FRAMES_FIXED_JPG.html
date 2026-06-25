@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The People (La Gente)</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #ffffff;
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .people-stage {
+      width: min(100vw, 760px);
+      min-height: 100vh;
+      padding: 6vh 2vw 96px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8vh;
+    }
+
+    .people-row {
+      width: 100%;
+      display: grid;
+      gap: 2vw;
+      justify-items: center;
+      align-items: center;
+    }
+
+    .people-row.top-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 78%;
+    }
+
+    .people-row.bottom-row {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      width: 96%;
+    }
+
+    .box {
+      width: min(22vw, 150px);
+      height: min(22vw, 150px);
+      border-radius: 20px;
+      overflow: hidden;
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .box:focus {
+      outline: 3px solid gold;
+      outline-offset: 3px;
+    }
+
+    .missing {
+      width: 100%;
+      height: 100%;
+      padding: 8px;
+      color: #8b0000;
+      font: bold 12px/1.2 Arial, sans-serif;
+      text-align: center;
+      background: #fff4f4;
+      border: 1px solid #cc7777;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .continue-button {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      font-size: 18px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 10px 20px;
+      z-index: 50;
+    }
+
+    @media (max-width: 700px) {
+      .people-stage {
+        width: 100vw;
+        padding: 7vh 2vw 88px;
+        gap: 7vh;
+      }
+
+      .people-row.top-row {
+        width: 78vw;
+        gap: 2vw;
+      }
+
+      .people-row.bottom-row {
+        width: 96vw;
+        gap: 2vw;
+      }
+
+      .box {
+        width: 22vw;
+        height: 22vw;
+        border-radius: 14px;
+      }
+
+      .missing {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="people-stage" aria-label="The People">
+    <section class="people-row top-row" aria-label="People row one">
+      <div id="box1" class="box"><img src="./characters/images/p1.jpg" alt="1"></div>
+      <div id="box2" class="box"><img src="./characters/images/p2.jpg" alt="2"></div>
+      <div id="box3" class="box"><img src="./characters/images/p3.jpg" alt="3"></div>
+    </section>
+
+    <section class="people-row bottom-row" aria-label="People row two">
+      <div id="box4" class="box"><img src="./characters/images/p4.jpg" alt="4"></div>
+      <div id="box5" class="box"><img src="./characters/images/p5.jpg" alt="5"></div>
+      <div id="box6" class="box"><img src="./characters/images/p6.jpg" alt="6"></div>
+      <div id="box7" class="box"><img src="./characters/images/p7.jpg" alt="7"></div>
+    </section>
+  </main>
+
+  <button class="continue-button" type="button" onclick="returnToConductor()">Continuar</button>
+  <audio id="player"></audio>
+
+<script>
+  function getSavedLessonNumber() {
+    const params = new URLSearchParams(window.location.search);
+    const rawLesson =
+      params.get("lesson") ||
+      sessionStorage.getItem("lesson") ||
+      sessionStorage.getItem("selectedLesson") ||
+      sessionStorage.getItem("currentLesson") ||
+      localStorage.getItem("lesson") ||
+      localStorage.getItem("selectedLesson") ||
+      localStorage.getItem("currentLesson") ||
+      "1";
+
+    const n = Number(rawLesson);
+    return Number.isFinite(n) && n > 0 ? String(n) : "1";
+  }
+
+  function getLane(params) {
+    const rawLane =
+      params.get("return") ||
+      params.get("lane") ||
+      sessionStorage.getItem("inglesyaLane") ||
+      localStorage.getItem("inglesyaLane") ||
+      (window.innerWidth < 700 ? "phone" : "desktop");
+
+    return rawLane === "phone" ? "phone" : "desktop";
+  }
+
+  function isFirstTimeStart(params) {
+    return params.get("firstTime") === "1" ||
+      params.get("autoStartLevel1") === "1" ||
+      sessionStorage.getItem("firstTimeStart") === "yes" ||
+      sessionStorage.getItem("autoStartLevel1") === "yes" ||
+      localStorage.getItem("firstTimeStart") === "yes" ||
+      localStorage.getItem("autoStartLevel1") === "yes";
+  }
+
+  function storeLessonOneForFirstTime(lane) {
+    sessionStorage.setItem("firstTimeStart", "yes");
+    sessionStorage.setItem("autoStartLevel1", "yes");
+    sessionStorage.setItem("lesson", "1");
+    sessionStorage.setItem("selectedLesson", "1");
+    sessionStorage.setItem("currentLesson", "1");
+    sessionStorage.setItem("inglesyaLane", lane);
+
+    localStorage.setItem("firstTimeStart", "yes");
+    localStorage.setItem("autoStartLevel1", "yes");
+    localStorage.setItem("lesson", "1");
+    localStorage.setItem("selectedLesson", "1");
+    localStorage.setItem("currentLesson", "1");
+    localStorage.setItem("inglesyaLane", lane);
+  }
+
+  function returnToConductor() {
+    const params = new URLSearchParams(window.location.search);
+    const lane = getLane(params);
+
+    if (isFirstTimeStart(params)) {
+      storeLessonOneForFirstTime(lane);
+      const structurePath = lane === "phone" ? "./ingles_phone/structure.html" : "./ingles_desktop/structure.html";
+      window.location.href = structurePath + "?autoStartLevel1=1&lesson=1";
+      return;
+    }
+
+    const lesson = getSavedLessonNumber();
+
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
+    sessionStorage.setItem("inglesyaLane", lane);
+
+    localStorage.setItem("lesson", lesson);
+    localStorage.setItem("selectedLesson", lesson);
+    localStorage.setItem("currentLesson", lesson);
+    localStorage.setItem("inglesyaLane", lane);
+
+    const conductorPath = lane === "phone" ? "./ingles_phone/conductor.html" : "./ingles_desktop/conductor.html";
+    window.location.href = conductorPath + "?lesson=" + encodeURIComponent(lesson) + "&prep=" + Date.now();
+  }
+</script>
+
+<script>
+  const AUDIO_BASE = "./characters/audio/";
+
+  function playAny(n) {
+    const a = new Audio(`${AUDIO_BASE}a${n}.m4a`);
+    a.play().catch(() => {});
+  }
+
+  for (let n = 1; n <= 7; n++) {
+    const el = document.getElementById("box" + n);
+    if (!el) continue;
+
+    const img = el.querySelector("img");
+    if (img) {
+      img.onerror = () => {
+        el.innerHTML = `<div class="missing">could not find<br>characters/images/p${n}.jpg</div>`;
+      };
+    }
+
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.addEventListener("click", () => playAny(n));
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        playAny(n);
+      }
+    });
+  }
+</script>
+</body>
+</html>

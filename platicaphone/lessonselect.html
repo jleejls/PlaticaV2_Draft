@@ -1,72 +1,235 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Plática Phone Nivel Select</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{ --gap: 4px; --slot-radius: 14px; --slot-border: 1px solid #ccc; --slot-hover: turquoise; --focus: 2px solid #1976d2; }
-    * { box-sizing: border-box; }
-    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#f0f8ff; color:#111; line-height:1.35; }
-    #nivel-select{ padding: 14px 10px 24px; max-width: 760px; margin: 0 auto; }
-    #nivel-select h2{ margin: 8px 0 10px; font-size: clamp(1.1rem, 4.2vw, 1.6rem); }
-    #nivel-buttons{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: stretch; }
-    .nav-button{ display:flex; align-items:center; justify-content:center; min-height: 42px; padding: 9px 6px; border: var(--slot-border); border-radius: var(--slot-radius); background: white; cursor:pointer; font-size: clamp(.9rem, 3.2vw, 1rem); font-weight: 600; text-align:center; transition: background .15s ease; }
-    .nav-button:hover{ background: var(--slot-hover); }
-    .nav-button:focus{ outline: var(--focus); }
-    .top-row{ display:flex; justify-content:space-between; align-items:center; gap: 10px; margin-bottom: 8px; }
-    .small-link{ border: 1px solid #aaa; border-radius: 10px; background: #fff; padding: 8px 12px; cursor: pointer; font-weight: 700; }
-  </style>
+<meta charset="UTF-8">
+<title>InglesYa Lesson Select</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(180deg, #dff7ff 0%, #f8f0d8 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lesson-page {
+    width: 94%;
+    max-width: 900px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .title-card {
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: 22px;
+    padding: 16px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.16);
+  }
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    opacity: 0.85;
+  }
+
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .lesson-button {
+    border: none;
+    border-radius: 20px;
+    padding: 19px 10px;
+    font-size: 1.18rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.18);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .lesson-button:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 7px 16px rgba(0,0,0,0.22);
+  }
+
+  .lesson-button:active {
+    transform: scale(0.98);
+  }
+
+  .footer-note {
+    margin-top: 18px;
+    font-size: 0.92rem;
+    opacity: 0.72;
+  }
+
+  @media (max-width: 700px) {
+    body {
+      align-items: flex-start;
+    }
+
+    .lesson-page {
+      width: 96%;
+      padding: 14px 10px;
+    }
+
+    .title-card {
+      padding: 12px 10px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+    }
+
+    .lesson-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .lesson-button {
+      padding: 14px 8px;
+      font-size: 1rem;
+      border-radius: 16px;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 0.82rem;
+    }
+  }
+
+  @media (max-height: 720px) and (max-width: 700px) {
+    .lesson-button {
+      padding: 11px 8px;
+      font-size: 0.96rem;
+    }
+
+    h1 {
+      font-size: 1.38rem;
+    }
+
+    .subtitle {
+      display: none;
+    }
+  }
+</style>
 </head>
+
 <body>
-  <div id="nivel-select">
-    <div class="top-row">
-      <h2>Selecciona un nivel:</h2>
-      <button class="small-link" type="button" id="home-button">Home</button>
-    </div>
-    <div id="nivel-buttons"></div>
+
+<div class="lesson-page">
+  <div class="title-card">
+    <h1>InglesYa</h1>
+    <div class="subtitle">Select a lesson</div>
   </div>
+
+  <div class="lesson-grid">
+    <button class="lesson-button" onclick="goToLesson(1)">Lesson 1</button>
+    <button class="lesson-button" onclick="goToLesson(2)">Lesson 2</button>
+    <button class="lesson-button" onclick="goToLesson(3)">Lesson 3</button>
+    <button class="lesson-button" onclick="goToLesson(4)">Lesson 4</button>
+
+    <button class="lesson-button" onclick="goToLesson(5)">Lesson 5</button>
+    <button class="lesson-button" onclick="goToLesson(6)">Lesson 6</button>
+    <button class="lesson-button" onclick="goToLesson(7)">Lesson 7</button>
+    <button class="lesson-button" onclick="goToLesson(8)">Lesson 8</button>
+
+    <button class="lesson-button" onclick="goToLesson(9)">Lesson 9</button>
+    <button class="lesson-button" onclick="goToLesson(10)">Lesson 10</button>
+    <button class="lesson-button" onclick="goToLesson(11)">Lesson 11</button>
+    <button class="lesson-button" onclick="goToLesson(12)">Lesson 12</button>
+
+    <button class="lesson-button" onclick="goToLesson(13)">Lesson 13</button>
+    <button class="lesson-button" onclick="goToLesson(14)">Lesson 14</button>
+    <button class="lesson-button" onclick="goToLesson(15)">Lesson 15</button>
+    <button class="lesson-button" onclick="goToLesson(16)">Lesson 16</button>
+
+    <button class="lesson-button" onclick="goToLesson(17)">Lesson 17</button>
+    <button class="lesson-button" onclick="goToLesson(18)">Lesson 18</button>
+    <button class="lesson-button" onclick="goToLesson(19)">Lesson 19</button>
+    <button class="lesson-button" onclick="goToLesson(20)">Lesson 20</button>
+  </div>
+
+  <div class="footer-note">Working lesson selector</div>
+</div>
+
 <script>
-(function () {
-  const nivelButtonsEl = document.getElementById("nivel-buttons");
-  const homeButton = document.getElementById("home-button");
+  function goToLesson(lessonNumber) {
+    const lesson = String(lessonNumber);
+    sessionStorage.setItem("selectedLesson", lesson);
+    sessionStorage.setItem("lesson", lesson);
+    sessionStorage.setItem("currentLesson", lesson);
 
-  const VERBS = [null,"Tener","Querer","Decir","Estar","Necesitar","Ir","Saber","Venir","Comer","Tomar","Hablar","Ver","Ser","Poder","Vivir","Haber","Dar","Poner","Hacer","Quedar"];
+    // Phone layout for the 3-4-3-4-3 structure.
+    // This is refreshed every time to avoid stale storage from an older layout.
+    const pronounSlots = [];
+    for (let i = 1; i <= 7; i++) {
+      pronounSlots.push({ id: i, kind: "main" });
+    }
 
-  function saveSelectedNivel(n){
-    sessionStorage.setItem("lesson", String(n));
-    sessionStorage.setItem("selectedLesson", String(n));
-    sessionStorage.setItem("currentLesson", String(n));
-    sessionStorage.setItem("level", String(n));
-    sessionStorage.setItem("selectedLevel", String(n));
-    sessionStorage.setItem("currentLevel", String(n));
-    sessionStorage.setItem("nivel", String(n));
-    sessionStorage.setItem("selectedNivel", String(n));
-    sessionStorage.setItem("platicaMode", "phone");
-    sessionStorage.setItem("phoneMode", "1");
-    sessionStorage.removeItem("desktopMode");
-    if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
+    const objectSlots = [];
+    for (let i = 1; i <= 10; i++) {
+      objectSlots.push({ id: i });
+    }
+
+    const expressionSlots = [{ id: 8 }, { id: 9 }];
+
+    sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
+    sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
+    sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
+    sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
+
+    const phoneLayoutConfig = {
+      layoutName: "phone-large-readable-3-column",
+      frameScale: 1.0,
+      rowGapPx: 5,
+      columnGapPx: 5,
+      allowFourFrameRowsToNearlyTouch: false,
+      preventScrolling: false,
+      preserveFrameOrder: true,
+      rows: [
+        { group: "pronouns", ids: [1, 2, 3] },
+        { group: "pronouns", ids: [4, 5, 6] },
+        { group: "pronouns", ids: [7] },
+        { group: "objects",  ids: [1, 2, 3] },
+        { group: "objects",  ids: [4, 5, 6] },
+        { group: "objects",  ids: [7, 8, 9] },
+        { group: "objects",  ids: [10] },
+        { group: "expressions", ids: [8, 9] }
+      ],
+      notes: "Use a 3-column readable phone layout. This deliberately allows vertical scrolling so the images are larger and clearer."
+    };
+
+    sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(phoneLayoutConfig));
+
+    if (!sessionStorage.getItem("tense")) {
+      sessionStorage.setItem("tense", "now");
+    }
+
+    window.location.href = "conductor.html";
   }
-
-  if (!sessionStorage.getItem("phoneLayoutRows") || !sessionStorage.getItem("buttonSlots")) {
-    window.location.href = "structure.html";
-    return;
-  }
-
-  for(let i = 1; i <= 20; i++){
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = `Nivel ${i} — ${VERBS[i]}`;
-    btn.className = "nav-button";
-    btn.addEventListener("click", () => {
-      saveSelectedNivel(i);
-      window.location.href = "conductor.html";
-    });
-    nivelButtonsEl.appendChild(btn);
-  }
-
-  homeButton.addEventListener("click", () => { window.location.href = "../index.html"; });
-})();
 </script>
+
 </body>
 </html>

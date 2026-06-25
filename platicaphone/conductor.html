@@ -1,728 +1,1304 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plática Phone Conductor</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #111;
-      overflow: hidden;
-    }
-    #structure {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
-    #board {
-      position: absolute;
-      left: 0;
-      right: 0;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-    .row {
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 auto;
-    }
-    .gaprow { flex: 0 0 auto; }
-    .box {
-      position: relative;
-      overflow: hidden;
-      background: transparent;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
-    .box.circle { border-radius: 50%; }
-    .box img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      pointer-events: none;
-    }
-    .box.circle img { border-radius: 50%; }
-    .selected { outline-offset: -5px; }
+<meta charset="utf-8">
+<title>Phone Conductor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<style>
+  *{ box-sizing:border-box; }
 
-    #pbar {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      background: #f0f0f0;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 4px 4px;
-      z-index: 50;
-      max-width: 96vw;
-      overflow: hidden;
-    }
-    .buttonz {
-      border: 2px solid #4CAF50;
-      border-radius: 1vw;
-      min-width: 0;
-      min-height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
-    .buttonz img {
-      max-width: 100%;
-      max-height: 100%;
-      display: block;
-      pointer-events: none;
-    }
-    #nivelchip {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      border: 1px solid #bbb;
-      border-radius: 50%;
-      padding: 0;
-      font-weight: 700;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-      z-index: 51;
-      user-select: none;
-      pointer-events: none;
-    }
+  :root{
+    --frame-size:112px;
+    --gap:4px;
+    --column-gap:5px;
+    --circle-size:110px;
+    --button-height:39px;
+  }
 
-    #creditsOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: #f0f8ff;
-      color: #111;
-      font-family: Arial, Helvetica, sans-serif;
-      text-align: center;
-    }
-    #creditsCard {
-      width: min(92vw, 620px);
-      max-height: 86vh;
-      overflow: auto;
-      background: rgba(255,255,255,.94);
-      border: 2px solid #4CAF50;
-      border-radius: 18px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.18);
-      padding: 22px 26px;
-    }
-    #creditsCard h1 {
-      margin: 0 0 12px;
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-    }
-    #creditsCard ul {
-      display: inline-block;
-      margin: 0;
-      padding-left: 1.2em;
-      text-align: left;
-      line-height: 1.55;
-      font-size: clamp(1rem, 2.3vw, 1.2rem);
-    }
+  html, body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:#ffffff;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#222;
+  }
 
-    .emailOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 22px;
-      background: rgba(0,0,0,.42);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    .emailOverlayCard {
-      width: min(90vw, 430px);
-      background: #ffffff;
-      color: #111111;
-      border: 2px solid #4CAF50;
-      border-radius: 16px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.25);
-      padding: 22px 20px;
-      text-align: center;
-    }
-    .emailOverlayCard h2 {
-      margin: 0 0 12px;
-      font-size: 1.35rem;
-    }
-    .emailOverlayAddress {
-      margin: 12px 0 18px;
-      font-size: 1.12rem;
-      font-weight: 700;
-      word-break: break-word;
-    }
-    .emailOverlayClose {
-      border: 1px solid #777;
-      border-radius: 9px;
-      background: #f4f4f4;
-      color: #111;
-      padding: 9px 16px;
-      font: 15px Arial, Helvetica, sans-serif;
-      cursor: pointer;
-    }
+  body{
+    padding-bottom:62px; /* keeps bottom buttons from covering lower pictures */
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
 
-  </style>
-</head>
-<body>
+
+  body.layout-loading main,
+  body.layout-loading #pbar,
+  body.layout-loading #lessonNumberBadge{
+    visibility:hidden;
+  }
+
+  header, h3{ display:none; }
+
+  main{
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+    padding:6px 5px 8px;
+  }
+
+  .section-box{ margin-bottom:var(--gap); }
+
+  .phone-layout-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:var(--column-gap);
+    margin-bottom:var(--gap);
+  }
+
+  .lesson-number-badge{
+    position:fixed;
+    top:7px;
+    left:7px;
+    z-index:70;
+    width:24px;
+    height:24px;
+    border:1px solid #d7dbe3;
+    border-radius:50%;
+    background:rgba(255,255,255,.88);
+    color:#333;
+    font:700 15px/24px Arial, Helvetica, sans-serif;
+    text-align:center;
+    pointer-events:none;
+  }
+
+  .phone-layout-row.object-start-row{
+    margin-top:10px;
+  }
+
+  .tile{
+    position:relative;
+    width:var(--frame-size);
+    height:var(--frame-size);
+    border:1px solid #d7dbe3;
+    border-radius:9px;
+    background:#f9fafb;
+    overflow:hidden;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .pronoun-tile{ background:#fffdf7; }
+  .object-tile{ background:#f9fbff; }
+
+  .tile img{
+    width:98%;
+    height:98%;
+    object-fit:contain;
+    display:block;
+    pointer-events:none;
+  }
+
+  .object-tile img{ transform:scale(1.12); }
+
+  .tile.selected{
+    outline:4px solid #c00000;
+    outline-offset:-4px;
+  }
+
+  .expression-circle{
+    width:var(--circle-size);
+    height:var(--circle-size);
+    border-radius:50%;
+    border:2px solid #9a74b8;
+    background:#ffffff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.14);
+  }
+
+  .expression-circle img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    pointer-events:none;
+  }
+
+  .expression-circle.speaking{
+    outline:4px solid #c00000;
+    outline-offset:2px;
+    box-shadow:0 0 0 4px rgba(192,0,0,.18), 0 2px 8px rgba(0,0,0,.20);
+  }
+
+  .label{
+    font:9px/1.15 monospace;
+    color:#777;
+    text-align:center;
+    padding:3px;
+    white-space:pre-line;
+  }
+
+  .expression-circle .label{
+    font-size:10px;
+    color:#5b3972;
+  }
+
+  .foot{ display:none; }
+
+  /* Bottom image-button bar */
+  .zipbutton{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:80;
+    display:grid;
+    grid-template-columns:repeat(8, 1fr);
+    gap:4px;
+    background:#f0f0f0;
+    border-top:1px solid #ddd;
+    padding:5px;
+    max-width:430px;
+    margin:0 auto;
+  }
+
+  .buttonz{
+    min-height:var(--button-height);
+    border:2px solid #4CAF50;
+    border-radius:9px;
+    background:#d05000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+
+  .buttonz img{
+    max-width:100%;
+    max-height:34px;
+    display:block;
+    pointer-events:none;
+  }
+
+  .contact-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+
+  .contact-overlay[hidden]{ display:none; }
+
+  .contact-box{
+    background:white;
+    color:black;
+    padding:22px;
+    border-radius:12px;
+    max-width:430px;
+    text-align:center;
+    font-family:Arial, sans-serif;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+  }
+
+  .contact-box a,
+  .contact-box button{
+    display:inline-block;
+    margin:6px;
+    padding:9px 13px;
+    border-radius:8px;
+    border:1px solid #777;
+    background:#f4f4f4;
+    color:#111;
+    text-decoration:none;
+    font:14px Arial, sans-serif;
+    cursor:pointer;
+  }
+
+  .contact-address{
+    font-weight:bold;
+    margin:10px 0 14px;
+  }
+
+  @media (max-width:380px){
+    main{ padding:4px 4px 1px; }
+    .section-box{ margin-bottom:var(--gap); }
+    .buttonz img{ max-height:31px; }
+  }
+
+  @media (max-width:330px){
+    body{ padding-bottom:52px; }
+  }
+
+
+  /* Long-hold image magnifier for phone frames. */
+  .image-magnifier-overlay{
+    position:fixed;
+    inset:0;
+    z-index:5000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.62);
+    padding:2vw;
+  }
+
+  .image-magnifier-overlay[hidden]{ display:none; }
+
+  .image-magnifier-frame{
+    position:relative;
+    width:min(96vw, 96vh, 430px);
+    height:min(96vw, 96vh, 430px);
+    border:2px solid #ffffff;
+    border-radius:14px;
+    background:#ffffff;
+    box-shadow:0 10px 32px rgba(0,0,0,.38);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  .image-magnifier-frame img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+
+  .image-magnifier-close{
+    position:absolute;
+    top:7px;
+    right:7px;
+    width:30px;
+    height:30px;
+    border:2px solid #ffffff;
+    border-radius:50%;
+    background:#c00000;
+    color:#ffffff;
+    font:700 20px/24px Arial, Helvetica, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+
+
+  /* Lesson preparation pause overlay lives in conductor.html only. */
+  .prep-overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,247,223,0.94);
+    padding:20px;
+  }
+
+  .prep-overlay.done{
+    display:none;
+  }
+
+  .prep-card{
+    width:min(90vw,430px);
+    background:#ffffff;
+    border:1px solid #d7c88a;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.22);
+    text-align:center;
+    padding:24px 18px;
+  }
+
+  .prep-spinner{
+    width:38px;
+    height:38px;
+    border:5px solid #ddd;
+    border-top-color:#007acc;
+    border-radius:50%;
+    margin:0 auto 14px;
+    animation:prepSpin 0.85s linear infinite;
+  }
+
+  @keyframes prepSpin{
+    to{ transform:rotate(360deg); }
+  }
+
+  .prep-message{
+    font-size:18px;
+    font-weight:700;
+    margin:0;
+    color:#3b3020;
+  }
+
+  .prep-credit{
+    font-size:13px;
+    margin:10px 0 0;
+    color:#665536;
+  }
+
+  .prep-credits{
+    margin:14px auto 0;
+    padding-top:12px;
+    border-top:1px solid #e4d8aa;
+    text-align:left;
+  }
+
+  .prep-credits h2{
+    margin:0 0 8px;
+    text-align:center;
+    font-size:1rem;
+    color:#3b3020;
+  }
+
+  .prep-credits ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+    font-size:0.84rem;
+    line-height:1.35;
+    color:#4d402b;
+  }
+
+  @media (max-width:700px){
+    .prep-card{ padding:20px 15px; }
+    .prep-credits ul{
+      font-size:0.78rem;
+      line-height:1.25;
+    }
+  }
+
+</style>
+
 <script>
+// ----- Phone Conductor startup -----
+// Accept the lesson number no matter which earlier page stored it,
+// including the lesson number sent back by lagente.html.
 (function () {
-  let selectedNivel = readStoredNivel();
-  let selectedPronounId = null;
-  let selectedBox = null;
-  let currentAudio = [];
-  let board = null;
-  let nivelchip = null;
-  let creditsTransitionLocked = false;
-  let creditsTransitionTimer = null;
+  const urlLesson = new URLSearchParams(window.location.search).get("lesson");
+  const storedLesson =
+    urlLesson ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    localStorage.getItem("selectedLesson") ||
+    localStorage.getItem("lesson") ||
+    localStorage.getItem("currentLesson") ||
+    "1";
 
-  const MINIMUM_CREDITS_DELAY_MS = 2000;
-  const CREDITS_HTML = `<li><strong>Project Assistant:</strong> AJ Cornell</li>
-      <li><strong>Male Voice:</strong> Jimmy Self</li>
-      <li><strong>Female Voice:</strong> Reina Maldonado</li>
-      <li><strong>Actors:</strong></li>
-      <li><strong></strong>-   Jose Garcia</li>
-      <li><strong></strong>-   Susana Mejia</li>
-      <li><strong></strong>-   Maria Flores</li>
-      <li><strong></strong>-   Lucia Garcia</li>
-      <li><strong></strong>-   Roberto Gomez</li>
-      <li><strong></strong>-   Noel Romero</li>
-      <li><strong></strong>-   AJ Cornell</li>`;
+  const cleanLesson = Number(storedLesson);
+  const lessonToUse = Number.isFinite(cleanLesson) && cleanLesson > 0 ? String(cleanLesson) : "1";
 
-  function showCreditsOverlay() {
-    const oldOverlay = document.getElementById("creditsOverlay");
-    if (oldOverlay) oldOverlay.remove();
+  sessionStorage.setItem("lesson", lessonToUse);
+  sessionStorage.setItem("selectedLesson", lessonToUse);
+  sessionStorage.setItem("currentLesson", lessonToUse);
 
-    const overlay = document.createElement("div");
-    overlay.id = "creditsOverlay";
-    overlay.setAttribute("aria-live", "polite");
+  localStorage.setItem("lesson", lessonToUse);
+  localStorage.setItem("selectedLesson", lessonToUse);
+  localStorage.setItem("currentLesson", lessonToUse);
 
-    const card = document.createElement("div");
-    card.id = "creditsCard";
-    card.innerHTML = '<h1>Créditos</h1><ul>' + CREDITS_HTML + '</ul>';
+  if (!sessionStorage.getItem("tense")) {
+    sessionStorage.setItem("tense", "now");
+  }
+})();
 
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
+console.log("=== PHONE CONDUCTOR STORAGE CHECK ===");
+for (let i = 0; i < sessionStorage.length; i++) {
+  const key = sessionStorage.key(i);
+  console.log(key, "=", sessionStorage.getItem(key));
+}
+</script>
+</head>
+
+<body class="layout-loading">
+
+<div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
+  <div class="prep-card">
+    <div class="prep-spinner" aria-hidden="true"></div>
+    <p class="prep-message">Your lesson is being prepared...</p>
+    <p class="prep-credit">Created by Jimmy Self</p>
+
+    <div class="prep-credits" aria-label="Credits">
+      <h2>Créditos</h2>
+      <ul>
+        <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
+        <li><strong>Ayudante:</strong> AJ Cornell</li>
+        <li><strong>Diseño y Arte:</strong> José García</li>
+        <li><strong>Visuales:</strong> María Flores</li>
+        <li><strong>Audio:</strong> Jimmy Self</li>
+        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
+        <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div id="lessonNumberBadge" class="lesson-number-badge" aria-label="Lesson number"></div>
+
+<header id="banner">Phone Conductor</header>
+
+<main>
+  <section class="section-box">
+    <h3>Phone Lesson</h3>
+    <div id="phoneLayoutMount" class="phone-layout"></div>
+  </section>
+</main>
+
+<div id="pbar" class="zipbutton" aria-label="Program buttons">
+  <div class="buttonz" data-btn="continue" title="Continuar / next lesson">
+    <img src="../trigger/adelante.png" alt="Adelante">
+  </div>
+  <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
+    <img src="../trigger/exit.png" alt="Exit">
+  </div>
+  <div class="buttonz" data-btn="choosel" title="Choose lesson">
+    <img src="../trigger/choosel.png" alt="Choose lesson">
+  </div>
+  <div class="buttonz" data-btn="help" title="Help / guidelines">
+    <img src="../trigger/help.png" alt="Help">
+  </div>
+  <div class="buttonz" data-btn="donate" title="Donate">
+    <img src="../trigger/donate.png" alt="Donate">
+  </div>
+    <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
+    <img src="../trigger/email.png" alt="Email">
+  </div>
+  <div class="buttonz" data-btn="lagente" title="La Gente">
+    <img src="../trigger/lagente.png" alt="La Gente">
+  </div>
+  <div class="buttonz" data-btn="translate" title="Translation">
+    <img src="../trigger/translate.png" alt="Translate">
+  </div>
+</div>
+
+<div id="contactOverlay" class="contact-overlay" hidden>
+  <div class="contact-box">
+    <h2>Email Contact</h2>
+    <p>Please send your message to:</p>
+    <p class="contact-address">spanishsoundbites@gmail.com</p>
+    <button type="button" onclick="closeContactOverlay()">Close</button>
+  </div>
+</div>
+<audio id="player" preload="auto"></audio>
+
+<script>
+(function(){
+  // ----- Safe sessionStorage receiver -----
+  // This conductor reads the structure page's instructions.
+  // It does not repair, rewrite, resize, or reposition the stored layout.
+  function readJSON(key, fallback){
+    try{
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return fallback;
+      const value = JSON.parse(raw);
+      return value == null ? fallback : value;
+    } catch(err){
+      console.warn("Bad sessionStorage JSON for", key, err);
+      return fallback;
+    }
   }
 
-  function hideCreditsOverlay() {
-    const overlay = document.getElementById("creditsOverlay");
-    if (overlay) overlay.remove();
+  function numberOr(value, fallback){
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
   }
 
-  function runAfterCredits(callback) {
-    if (creditsTransitionLocked) return;
+  const tense = sessionStorage.getItem("tense") || "now";
 
-    creditsTransitionLocked = true;
-    showCreditsOverlay();
-    window.clearTimeout(creditsTransitionTimer);
+  let lesson = Number(
+    sessionStorage.getItem("lesson") ||
+    sessionStorage.getItem("selectedLesson") ||
+    sessionStorage.getItem("currentLesson") ||
+    "1"
+  );
 
-    creditsTransitionTimer = window.setTimeout(() => {
-      hideCreditsOverlay();
-      creditsTransitionLocked = false;
-      if (typeof callback === "function") callback();
-    }, MINIMUM_CREDITS_DELAY_MS);
+  if (!lesson || Number.isNaN(lesson)) lesson = 1;
+  sessionStorage.setItem("lesson", String(lesson));
+  sessionStorage.setItem("selectedLesson", String(lesson));
+
+  const phoneLayoutConfig = readJSON("phoneLayoutConfig", null);
+  const storedPronounSlots = readJSON("pronounSlots", []);
+  const storedObjectSlots = readJSON("objectSlots", []);
+  const storedExpressionSlots = readJSON("expressionSlots", []);
+  const exprIds = readJSON("expressionPronounIds", [8, 9]);
+
+  // Display-only emergency fallbacks. These keep the page from going blank if
+  // structure.html was bypassed, but they are never written back into storage.
+  const pronounSlots = Array.isArray(storedPronounSlots) && storedPronounSlots.length
+    ? storedPronounSlots
+    : [1,2,3,4,5,6,7].map(id => ({ id, kind:"main" }));
+
+  const objectSlots = Array.isArray(storedObjectSlots) && storedObjectSlots.length
+    ? storedObjectSlots
+    : [1,2,3,4,5,6,7,8,9,10].map(id => ({ id }));
+
+  const expressionSlots = Array.isArray(storedExpressionSlots) && storedExpressionSlots.length
+    ? storedExpressionSlots
+    : [8,9].map(id => ({ id }));
+
+  const layoutRows = phoneLayoutConfig && Array.isArray(phoneLayoutConfig.rows) && phoneLayoutConfig.rows.length
+    ? phoneLayoutConfig.rows
+    : [
+        { group:"pronouns", ids:[1,2,3] },
+        { group:"pronouns", ids:[4,5,6] },
+        { group:"pronouns", ids:[7] },
+        { group:"objects", ids:[1,2,3] },
+        { group:"objects", ids:[4,5,6] },
+        { group:"objects", ids:[7,8,9] },
+        { group:"objects", ids:[10] },
+        { group:"expressions", ids:[8,9] }
+      ];
+
+  // Apply only the structure-provided layout values.
+  // These are not conductor decisions; they are the conductor obeying structure.html.
+  (function applyStructureLayout(){
+    const root = document.documentElement;
+    const scale = phoneLayoutConfig ? numberOr(phoneLayoutConfig.frameScale, 1) : 1;
+    const rowGap = phoneLayoutConfig ? numberOr(phoneLayoutConfig.rowGapPx, 3) : 3;
+    const columnGap = phoneLayoutConfig ? numberOr(phoneLayoutConfig.columnGapPx, rowGap) : 4;
+
+    const viewportWidth = Math.max(300, Math.min(window.innerWidth || 360, 430));
+    const largestRow = layoutRows.reduce((max, row) => Math.max(max, row && Array.isArray(row.ids) ? row.ids.length : 0), 1);
+    const usableWidth = viewportWidth - 10 - Math.max(0, largestRow - 1) * columnGap;
+    const baseFrameSize = Math.floor(usableWidth / largestRow);
+
+    // Big phone presentation: the largest row should be 3 frames, not 4.
+    // Four frames across forces everything down around 84px on a typical phone.
+    const requestedFrameSize = Math.floor(baseFrameSize * scale);
+    const maxFrameSize = Math.floor(usableWidth / largestRow);
+    const frameSize = Math.max(92, Math.min(requestedFrameSize, maxFrameSize));
+    const circleSize = Math.max(92, Math.min(118, Math.round(frameSize * 1.02)));
+
+    root.style.setProperty("--frame-size", frameSize + "px");
+    root.style.setProperty("--gap", rowGap + "px");
+    root.style.setProperty("--column-gap", columnGap + "px");
+    root.style.setProperty("--circle-size", circleSize + "px");
+
+    document.documentElement.style.overflowX = "hidden";
+    document.body.style.overflowX = "hidden";
+
+    // The larger phone layout intentionally allows vertical scrolling.
+    // That is the tradeoff that makes the pictures readable instead of dinky.
+    if (phoneLayoutConfig && phoneLayoutConfig.preventScrolling) {
+      document.documentElement.style.overflowY = "hidden";
+      document.body.style.overflowY = "hidden";
+    } else {
+      document.documentElement.style.overflowY = "auto";
+      document.body.style.overflowY = "auto";
+    }
+  })();
+
+  // IMPORTANT: phone conductor sits inside ingles_phone.
+  // group is one folder above ingles_phone, so we use ../group
+  const basePath = `../group/lesson${lesson}`;
+  document.getElementById("banner").textContent = `Phone — Lesson ${lesson}`;
+  document.getElementById("lessonNumberBadge").textContent = String(lesson);
+
+  // ----- Paths -----
+  // Supports both folder styles:
+  // 1) older split folders: pronouns/images, objects/images, pronouns/audios, objects/audios
+  // 2) newer single folders: image and sound
+  const pronImg = i => [
+    `${basePath}/image/p${i + 10}.jpg`,
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/pronouns/images/p${i}.jpg`,
+    `${basePath}/pronouns/images/img_${i}.jpg`,
+    `${basePath}/pronouns/image/p${i}.jpg`
+  ];
+
+  const objImg = i => [
+    `${basePath}/image/p${i}.jpg`,
+    `${basePath}/image/o${i}.jpg`,
+    `${basePath}/objects/images/p${i}.jpg`,
+    `${basePath}/objects/images/img_${i}.jpg`,
+    `${basePath}/objects/image/o${i}.jpg`,
+    `${basePath}/image/p${i + 9}.jpg`,
+    `${basePath}/image/p${i + 10}.jpg`
+  ];
+
+  const pronAud = i => [
+    `${basePath}/pronouns/audios/a${i}.m4a`,
+    `${basePath}/sound/${i + 10}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+
+  const objAud = i => [
+    `${basePath}/objects/audios/a${i}.m4a`,
+    `${basePath}/sound/${i}.m4a`
+  ];
+
+  // ----- Conversation-circle audio paths -----
+  // Francisco uses the first expression circle, Rachel uses the second.
+  // One click on either circle plays one two-part exchange, then stops.
+  const FRANCISCO_EXPRESSION_ID = expressionSlots[0]?.id || exprIds[0] || 8;
+  const RACHEL_EXPRESSION_ID = expressionSlots[1]?.id || exprIds[1] || 9;
+
+  function conversationAud(speaker, role, number){
+    const shortSpeaker = speaker === "francisco" ? "f" : "r";
+    const shortRole = role === "statement" ? "s" : "reply";
+
+    return [
+      `${basePath}/conversation/${speaker}_${role}_${number}.m4a`,
+      `${basePath}/conversation/${speaker}-${role}-${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}_${shortRole}_${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${shortRole}${number}.m4a`,
+      `${basePath}/conversation/${speaker}${number}.m4a`,
+      `${basePath}/conversation/${shortSpeaker}${number}.m4a`
+    ];
   }
 
-  function startAfterCredits() {
-    runAfterCredits(boot);
-  }
+  // Start with Francisco statement + Rachel reply.
+  // Change this to true after the Rachel-statement / Francisco-reply audios are recorded.
+  const USE_RACHEL_STATEMENT_ROUND = false;
 
-  function readStoredNivel() {
-    const stored =
-      sessionStorage.getItem("selectedNivel") ||
-      sessionStorage.getItem("nivel") ||
-      sessionStorage.getItem("selectedLevel") ||
-      sessionStorage.getItem("level") ||
-      sessionStorage.getItem("currentLevel") ||
-      sessionStorage.getItem("selectedLesson") ||
-      sessionStorage.getItem("lesson") ||
-      sessionStorage.getItem("currentLesson") ||
-      "1";
-    const n = Number(stored);
-    return Number.isFinite(n) && n >= 1 && n <= 20 ? n : 1;
-  }
+  function buildConversationPairs(){
+    const pairs = [];
 
-  function saveNivel(n) {
-    selectedNivel = n;
-    sessionStorage.setItem("lesson", String(n));
-    sessionStorage.setItem("selectedLesson", String(n));
-    sessionStorage.setItem("currentLesson", String(n));
-    sessionStorage.setItem("level", String(n));
-    sessionStorage.setItem("selectedLevel", String(n));
-    sessionStorage.setItem("currentLevel", String(n));
-    sessionStorage.setItem("nivel", String(n));
-    sessionStorage.setItem("selectedNivel", String(n));
-    sessionStorage.setItem("platicaMode", "phone");
-    sessionStorage.setItem("phoneMode", "1");
-    sessionStorage.removeItem("desktopMode");
-    if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
-  }
-
-  function go404(reason) {
-    try { sessionStorage.setItem("conductorError", reason || "Missing required phone structure"); } catch(e) {}
-    window.location.replace("../404.html");
-  }
-
-  function parseStoredJSON(key, fallback) {
-    const raw = sessionStorage.getItem(key);
-    if (!raw) return fallback;
-    try { return JSON.parse(raw); }
-    catch (e) { return fallback; }
-  }
-
-  function readRequiredRows() {
-    const rows = parseStoredJSON("phoneLayoutRows", null) || parseStoredJSON("layoutRows", null);
-
-    if (!Array.isArray(rows) || rows.length === 0) {
-      go404("Missing or empty sessionStorage key: phoneLayoutRows/layoutRows");
-      return null;
+    for (let i = 1; i <= 15; i++) {
+      pairs.push([
+        { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "statement", i) },
+        { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "reply", i) }
+      ]);
     }
 
-    const valid = rows.every(row => {
-      if (!row || typeof row !== "object") return false;
-      if (row.group === "gap") return true;
-      if (row.group !== "pronouns" && row.group !== "objects") return false;
-      if (row.role && row.role !== "pronoun" && row.role !== "object" && row.role !== "expression") return false;
-      return Array.isArray(row.ids) && row.ids.every(id => Number.isFinite(Number(id)));
+    if (USE_RACHEL_STATEMENT_ROUND) {
+      for (let i = 1; i <= 15; i++) {
+        pairs.push([
+          { speakerId: RACHEL_EXPRESSION_ID, sources: conversationAud("rachel", "statement", i) },
+          { speakerId: FRANCISCO_EXPRESSION_ID, sources: conversationAud("francisco", "reply", i) }
+        ]);
+      }
+    }
+
+    return pairs;
+  }
+
+  // ----- Tile builder -----
+  function makeTile(srcList, fallbackLabel, extraClass){
+    const sources = Array.isArray(srcList) ? srcList : [srcList];
+    let srcIndex = 0;
+
+    const d = document.createElement("div");
+    d.className = extraClass ? `tile ${extraClass}` : "tile";
+
+    const img = document.createElement("img");
+    img.alt = fallbackLabel;
+
+    function markTileReady(){
+      d.dataset.ready = "yes";
+    }
+
+    img.onload = markTileReady;
+
+    img.onerror = () => {
+      srcIndex += 1;
+      if (srcIndex < sources.length) {
+        img.src = sources[srcIndex];
+      } else {
+        d.innerHTML = `<div class="label">missing:\n${fallbackLabel}</div>`;
+        markTileReady();
+      }
+    };
+
+    img.src = sources[srcIndex];
+    d.appendChild(img);
+    return d;
+  }
+
+  function findSlot(slots, id){
+    return slots.find(slot => Number(slot.id) === Number(id)) || { id };
+  }
+
+  const expressionTilesByIndex = {};
+
+  function buildOneTile(group, id){
+    let tile;
+
+    if (group === "pronouns") {
+      const slot = findSlot(pronounSlots, id);
+      tile = makeTile(pronImg(slot.id), `p${slot.id}.jpg`, "pronoun-tile");
+      tile.dataset.group = "pronouns";
+      tile.dataset.index = slot.id;
+      tile.dataset.kind = slot.kind || "main";
+      return tile;
+    }
+
+    if (group === "objects") {
+      const slot = findSlot(objectSlots, id);
+      tile = makeTile(objImg(slot.id), `o${slot.id}.jpg`, "object-tile");
+      tile.dataset.group = "objects";
+      tile.dataset.index = slot.id;
+      return tile;
+    }
+
+    if (group === "expressions") {
+      const slot = findSlot(expressionSlots, id);
+      tile = makeTile(pronImg(slot.id), `expression p${slot.id}.jpg`, "expression-circle");
+      tile.dataset.group = "expressions";
+      tile.dataset.index = slot.id;
+      expressionTilesByIndex[Number(slot.id)] = tile;
+      return tile;
+    }
+
+    return null;
+  }
+
+  // ----- Build exactly the rows provided by structure.html -----
+  const mount = document.getElementById("phoneLayoutMount");
+  let previousRowGroup = null;
+
+  layoutRows.forEach(rowSpec => {
+    if (!rowSpec || !Array.isArray(rowSpec.ids)) return;
+
+    const rowGroup = rowSpec.group || "unknown";
+    const row = document.createElement("div");
+    row.className = "phone-layout-row";
+    row.dataset.group = rowGroup;
+
+    // Add a small visual breathing space where the object rows begin.
+    if (rowGroup === "objects" && previousRowGroup !== "objects") {
+      row.classList.add("object-start-row");
+    }
+
+    rowSpec.ids.forEach(id => {
+      const tile = buildOneTile(rowSpec.group, id);
+      if (tile) row.appendChild(tile);
     });
 
-    if (!valid) {
-      go404("phoneLayoutRows has an invalid row structure");
-      return null;
-    }
-    return rows;
-  }
+    mount.appendChild(row);
+    previousRowGroup = rowGroup;
+  });
 
-  function readRequiredButtons() {
-    const buttons = parseStoredJSON("buttonSlots", null);
+  // Keep the screen hidden until the picture elements have finished loading.
+  // This prevents a momentary flash of empty frames before the finished layout appears.
+  (function revealLayoutWhenImagesAreReady(){
+    const startedAt = Date.now();
+    const maximumWait = 1800;
 
-    if (!Array.isArray(buttons) || buttons.length === 0) {
-      go404("Missing or empty sessionStorage key: buttonSlots");
-      return null;
-    }
-
-    const valid = buttons.every(btn => {
-      const img = btn && (btn.img || btn.image);
-      return btn &&
-             typeof btn === "object" &&
-             typeof btn.action === "string" &&
-             typeof img === "string" &&
-             typeof btn.title === "string";
-    });
-
-    if (!valid) {
-      go404("buttonSlots has an invalid button structure");
-      return null;
+    function reveal(){
+      document.body.classList.remove("layout-loading");
     }
 
-    return buttons;
-  }
-
-  function styleConfig() {
-    return parseStoredJSON("phoneStyle", {}) || {};
-  }
-
-  function setStyle(el, prop, value) {
-    if (value !== undefined && value !== null && value !== "") el.style[prop] = String(value);
-  }
-
-  function applyPhoneStyle(style) {
-    document.body.style.background = style.bodyBackground || "#f0f8ff";
-
-    const structure = document.getElementById("structure");
-    const pbar = document.getElementById("pbar");
-    structure.style.background = style.bodyBackground || "#f0f8ff";
-
-    setStyle(board, "top", style.boardTop || "0.35vh");
-    setStyle(board, "bottom", style.boardBottom || "8.6vh");
-    setStyle(board, "padding", style.boardPadding || "0 1px");
-    setStyle(board, "gap", style.rowGap || "0px");
-
-    pbar.style.bottom = style.buttonBarBottom || "2vh";
-    pbar.style.gap = style.buttonGap || "0.35vh";
-
-    document.querySelectorAll(".buttonz").forEach(btn => {
-      btn.style.width = style.buttonWidth || "10.8vw";
-      btn.style.height = style.buttonHeight || "5vh";
-      btn.style.maxHeight = style.buttonMaxHeight || "44px";
-      btn.style.background = style.buttonBackground || "#d05000";
-    });
-
-    if (nivelchip) {
-      nivelchip.style.position = style.chipPosition || "absolute";
-      nivelchip.style.left = style.chipLeft || "calc(50% + min(18.5vw, 9.8vh, 78px) + 0.4vw + 8px)";
-      nivelchip.style.top = style.chipTop || "50%";
-      nivelchip.style.right = style.chipRight || "auto";
-      nivelchip.style.bottom = style.chipBottom || "auto";
-      nivelchip.style.transform = style.chipTransform || "translateY(-50%)";
-      nivelchip.style.width = style.chipWidth || "24px";
-      nivelchip.style.height = style.chipHeight || "24px";
-      nivelchip.style.borderRadius = style.chipBorderRadius || "50%";
-      nivelchip.style.fontSize = style.chipFontSize || "13px";
-      nivelchip.style.background = style.chipBackground || "rgba(255,255,255,.92)";
-      nivelchip.style.border = style.chipBorder || "1px solid #bbb";
-      nivelchip.style.color = style.chipColor || "#111";
-      nivelchip.style.boxShadow = style.chipBoxShadow || "0 2px 6px rgba(0,0,0,.08)";
+    function allTilesReady(){
+      const tiles = Array.from(mount.querySelectorAll(".tile"));
+      if (!tiles.length) return true;
+      return tiles.every(tile => tile.dataset.ready === "yes");
     }
 
-    document.querySelectorAll(".selected").forEach(el => {
-      el.style.outline = style.selectedOutline || "5px solid red";
-    });
+    function check(){
+      if (allTilesReady() || Date.now() - startedAt > maximumWait) {
+        requestAnimationFrame(reveal);
+      } else {
+        window.setTimeout(check, 40);
+      }
+    }
+
+    check();
+  })();
+
+  // Debug badge
+  const foot = document.createElement("div");
+  foot.className = "foot";
+  foot.textContent = `tense=${tense}  lesson=${lesson}  P=${pronounSlots.length}  O=${objectSlots.length}  E=${expressionSlots.length}`;
+  document.body.appendChild(foot);
+
+  console.log("=== PHONE CONDUCTOR RECEIVED STRUCTURE ===", {
+    lesson,
+    tense,
+    phoneLayoutConfig,
+    pronounSlots,
+    objectSlots,
+    expressionSlots,
+    expressionPronounIds: exprIds,
+    layoutRows
+  });
+
+  // ----- Audio logic: no overlaps, serial uniting -----
+  const player = document.getElementById("player");
+  let lastPronSrc = null;
+  let lastPronJoinable = false;
+  let selectedPronTile = null;
+  let playToken = 0;
+
+  function clearPronounSelection(){
+    if (selectedPronTile) selectedPronTile.classList.remove("selected");
+    selectedPronTile = null;
   }
 
-  function buildShell(rows, buttons) {
-    document.body.innerHTML = "";
+  function selectPronounTile(tile){
+    clearPronounSelection();
+    selectedPronTile = tile;
+    selectedPronTile.classList.add("selected");
+  }
 
-    const structure = document.createElement("div");
-    structure.id = "structure";
+  function isExpressionPronoun(index){
+    return Array.isArray(exprIds) && exprIds.map(Number).includes(Number(index));
+  }
 
-    board = document.createElement("div");
-    board.id = "board";
+  function playSequence(sources){
+    clearExpressionHighlights();
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
 
-    const style = styleConfig();
+    try { player.pause(); } catch(e) {}
+    player.onended = null;
+    player.onerror = null;
 
-    rows.forEach(row => {
-      if (row.group === "gap") {
-        const gap = document.createElement("div");
-        gap.className = "gaprow";
-        setStyle(gap, "height", row.value || style.gapHeight || "1.2vh");
-        setStyle(gap, "maxHeight", style.gapMaxHeight || "16px");
-        board.appendChild(gap);
+    function playOne(srcList){
+      const choices = Array.isArray(srcList) ? srcList : [srcList];
+      let choiceIndex = 0;
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("play failed:", err);
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= sources.length) return;
+      playOne(sources[i++]);
+    }
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
+  }
+
+  function clearExpressionHighlights(){
+    Object.values(expressionTilesByIndex).forEach(tile => tile.classList.remove("speaking"));
+  }
+
+  function markExpressionSpeaker(speakerId){
+    clearExpressionHighlights();
+    const tile = expressionTilesByIndex[Number(speakerId)];
+    if (tile) tile.classList.add("speaking");
+  }
+
+  function shuffleArray(items){
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = items[i];
+      items[i] = items[j];
+      items[j] = temp;
+    }
+    return items;
+  }
+
+  let conversationShuffleBag = [];
+
+  function refillConversationShuffleBag(){
+    conversationShuffleBag = shuffleArray(buildConversationPairs());
+  }
+
+  function playRandomConversationPair(){
+    if (!conversationShuffleBag.length) {
+      refillConversationShuffleBag();
+    }
+
+    if (!conversationShuffleBag.length) return;
+
+    const pairItems = conversationShuffleBag.shift();
+    playConversationPairOnly(pairItems);
+  }
+
+  function playConversationPairOnly(items){
+    playToken++;
+    const myToken = playToken;
+    let i = 0;
+
+    try { player.pause(); } catch(e) {}
+    player.onended = null;
+    player.onerror = null;
+
+    function stopPair(){
+      if (myToken !== playToken) return;
+      player.onended = null;
+      player.onerror = null;
+      clearExpressionHighlights();
+    }
+
+    function playOne(item){
+      const choices = Array.isArray(item.sources) ? item.sources : [item.sources];
+      let choiceIndex = 0;
+      markExpressionSpeaker(item.speakerId);
+
+      function tryChoice(){
+        if (myToken !== playToken) return;
+        if (choiceIndex >= choices.length) {
+          next();
+          return;
+        }
+
+        const src = choices[choiceIndex++];
+        player.onerror = tryChoice;
+        player.src = src;
+        player.currentTime = 0;
+        player.play().catch(err => {
+          console.log("conversation play failed:", err);
+          tryChoice();
+        });
+      }
+
+      tryChoice();
+    }
+
+    function next(){
+      if (myToken !== playToken) return;
+      if (i >= items.length) {
+        stopPair();
         return;
       }
-
-      const rowEl = document.createElement("div");
-      rowEl.className = "row";
-      rowEl.dataset.group = row.group;
-      rowEl.dataset.role = row.role || (row.group === "pronouns" ? "pronoun" : "object");
-      rowEl.dataset.columns = String(row.columns || row.ids.length);
-      setStyle(rowEl, "maxWidth", style.rowMaxWidth || "760px");
-      setStyle(rowEl, "gap", style.columnGap || style.frameGap || style.rowGap || "0px");
-      setStyle(rowEl, "position", "relative");
-
-      row.ids.forEach(id => {
-        const role = row.role || (row.group === "pronouns" ? "pronoun" : "object");
-        const box = document.createElement("div");
-        box.className = "box" + ((row.shape === "circle" || role === "expression") ? " circle" : "");
-        box.dataset.group = row.group;
-        box.dataset.role = role;
-        box.dataset.id = String(id);
-        box.dataset.name = row.group + String(id);
-
-        if (role === "expression") {
-          setStyle(box, "width", style.expressionWidth || "min(22vw, 11.5vh, 92px)");
-          setStyle(box, "height", style.expressionHeight || "min(22vw, 11.5vh, 92px)");
-        } else {
-          setStyle(box, "width", style.boxWidth || "min(25.2vw, 13.4vh, 106px)");
-          setStyle(box, "height", style.boxHeight || "min(25.2vw, 13.4vh, 106px)");
-        }
-
-        const img = document.createElement("img");
-        img.alt = role + " " + id;
-        box.appendChild(img);
-        rowEl.appendChild(box);
-      });
-
-      if ((row.role || "") === "expression" && style.showLevelBadge !== false) {
-        nivelchip = document.createElement("div");
-        nivelchip.id = "nivelchip";
-        nivelchip.setAttribute("aria-label", "Nivel actual");
-        nivelchip.textContent = String(selectedNivel);
-        rowEl.appendChild(nivelchip);
-      }
-
-      board.appendChild(rowEl);
-    });
-
-    structure.appendChild(board);
-    document.body.appendChild(structure);
-
-    const pbar = document.createElement("div");
-    pbar.id = "pbar";
-
-    buttons.forEach(btn => {
-      const b = document.createElement("div");
-      b.className = "buttonz";
-      b.dataset.btn = btn.action;
-      b.title = btn.title;
-
-      const img = document.createElement("img");
-      img.src = btn.img || btn.image;
-      img.alt = btn.alt || btn.title;
-      b.appendChild(img);
-      pbar.appendChild(b);
-    });
-
-    document.body.appendChild(pbar);
-  }
-
-  function nivelRoot() {
-    return "../group/lesson" + selectedNivel;
-  }
-
-  function imagePath(group, id) {
-    return nivelRoot() + "/" + group + "/images/p" + id + ".png?v=" + Date.now();
-  }
-
-  function audioPath(group, id) {
-    return nivelRoot() + "/" + group + "/audios/a" + id + ".m4a";
-  }
-
-  function translationPath() {
-    selectedNivel = readStoredNivel();
-    return "../translation/" + selectedNivel + ".m4a";
-  }
-
-  function stopAllAudio() {
-    currentAudio.forEach(a => {
-      try { a.pause(); a.currentTime = 0; } catch(e) {}
-    });
-    currentAudio = [];
-  }
-
-  function makeAudio(src) {
-    const a = new Audio(src);
-    currentAudio.push(a);
-    a.addEventListener("ended", () => {
-      currentAudio = currentAudio.filter(x => x !== a);
-    });
-    return a;
-  }
-
-  function playOne(src) {
-    stopAllAudio();
-    const a = makeAudio(src);
-    a.play().catch(() => {});
-  }
-
-  function playChain(firstSrc, secondSrc) {
-    stopAllAudio();
-    const a = makeAudio(firstSrc);
-    a.addEventListener("ended", () => {
-      const b = makeAudio(secondSrc);
-      b.play().catch(() => {});
-    }, { once: true });
-    a.play().catch(() => {
-      const b = makeAudio(secondSrc);
-      b.play().catch(() => {});
-    });
-  }
-
-  function clearSelection() {
-    selectedPronounId = null;
-    if (selectedBox) {
-      selectedBox.classList.remove("selected");
-      selectedBox.style.outline = "";
+      playOne(items[i++]);
     }
-    selectedBox = null;
+
+    player.onended = () => {
+      if (myToken !== playToken) return;
+      next();
+    };
+
+    next();
   }
 
-  function selectPronoun(box, id) {
-    if (selectedBox) {
-      selectedBox.classList.remove("selected");
-      selectedBox.style.outline = "";
-    }
-    selectedPronounId = id;
-    selectedBox = box;
-    box.classList.add("selected");
-    box.style.outline = (styleConfig().selectedOutline || "5px solid red");
+  // ----- Long-hold magnifier -----
+  // A brief tap still plays audio. A long hold opens a large square image view
+  // and suppresses the tap/click audio that mobile browsers normally fire after release.
+  let longHoldTimer = null;
+  let longHoldTriggered = false;
+  let suppressNextTileClick = false;
+  const LONG_HOLD_MS = 560;
+
+  function closeImageMagnifier(){
+    const overlay = document.getElementById("imageMagnifierOverlay");
+    if (overlay) overlay.hidden = true;
   }
 
-  function renderNivel() {
-    selectedNivel = readStoredNivel();
-    if (nivelchip) {
-      const style = styleConfig();
-      const numberOnly =
-        style.chipNumberOnly === true ||
-        sessionStorage.getItem("levelBadgeNumberOnly") === "1";
-      const prefix =
-        style.chipTextPrefix !== undefined
-          ? String(style.chipTextPrefix)
-          : (sessionStorage.getItem("nivelBadgePrefix") || sessionStorage.getItem("levelBadgePrefix") || "");
-      nivelchip.textContent = numberOnly ? String(selectedNivel) : (prefix + String(selectedNivel));
-    }
-    clearSelection();
+  function ensureImageMagnifier(){
+    let overlay = document.getElementById("imageMagnifierOverlay");
+    if (overlay) return overlay;
 
-    document.querySelectorAll(".box").forEach(box => {
-      const group = box.dataset.group;
-      const role = box.dataset.role;
-      const id = Number(box.dataset.id);
-      const img = box.querySelector("img");
-      if (img) img.src = imagePath(group, id);
+    overlay = document.createElement("div");
+    overlay.id = "imageMagnifierOverlay";
+    overlay.className = "image-magnifier-overlay";
+    overlay.hidden = true;
+    overlay.setAttribute("aria-label", "Magnified image");
 
-      box.onclick = function () {
-        if (group === "pronouns" && role === "expression") {
-          clearSelection();
-          playOne(audioPath("pronouns", id));
-          return;
-        }
+    const frame = document.createElement("div");
+    frame.className = "image-magnifier-frame";
 
-        if (group === "pronouns") {
-          selectPronoun(box, id);
-          playOne(audioPath("pronouns", id));
-          return;
-        }
-
-        if (group === "objects") {
-          if (selectedPronounId) {
-            playChain(audioPath("pronouns", selectedPronounId), audioPath("objects", id));
-            clearSelection();
-          } else {
-            playOne(audioPath("objects", id));
-          }
-        }
-      };
-    });
-  }
-
-  function goNivelSelect() {
-    stopAllAudio();
-    window.location.href = "lessonselect.html";
-  }
-
-  function exitProgram() {
-    stopAllAudio();
-    window.location.href = "../stop.html";
-  }
-
-  function nudgeChip() {
-    if (!nivelchip) return;
-    try {
-      nivelchip.animate(
-        [{ transform: "scale(1)" }, { transform: "scale(1.06)" }, { transform: "scale(1)" }],
-        { duration: 320, easing: "ease-out" }
-      );
-    } catch(e) {}
-  }
-
-
-  function showEmailOverlay() {
-    const existing = document.getElementById("emailOverlay");
-    if (existing) existing.remove();
-
-    const overlay = document.createElement("div");
-    overlay.id = "emailOverlay";
-    overlay.className = "emailOverlay";
-
-    const card = document.createElement("div");
-    card.className = "emailOverlayCard";
-
-    const title = document.createElement("h2");
-    title.textContent = "Contact";
-
-    const line = document.createElement("p");
-    line.textContent = "Email address:";
-
-    const address = document.createElement("div");
-    address.className = "emailOverlayAddress";
-    address.textContent = "spanishsoundbites@gmail.com";
+    const img = document.createElement("img");
+    img.id = "imageMagnifierImg";
+    img.alt = "Magnified lesson image";
 
     const close = document.createElement("button");
     close.type = "button";
-    close.className = "emailOverlayClose";
-    close.textContent = "Go Back";
+    close.className = "image-magnifier-close";
+    close.setAttribute("aria-label", "Close magnified image");
+    close.textContent = "×";
 
-    close.addEventListener("click", function (ev) {
+    close.addEventListener("click", ev => {
       ev.preventDefault();
       ev.stopPropagation();
-      overlay.remove();
+      closeImageMagnifier();
     });
 
-    overlay.addEventListener("click", function (ev) {
-      if (ev.target === overlay) overlay.remove();
+    overlay.addEventListener("click", ev => {
+      if (ev.target === overlay) closeImageMagnifier();
     });
 
-    card.addEventListener("click", function (ev) {
-      ev.stopPropagation();
-    });
-
-    card.appendChild(title);
-    card.appendChild(line);
-    card.appendChild(address);
-    card.appendChild(close);
-    overlay.appendChild(card);
+    frame.appendChild(img);
+    frame.appendChild(close);
+    overlay.appendChild(frame);
     document.body.appendChild(overlay);
+    return overlay;
   }
 
-  function attachButtonBehavior() {
-    document.addEventListener("click", ev => {
-      const btn = ev.target.closest && ev.target.closest(".buttonz");
-      if (!btn) return;
+  function openImageMagnifier(tile){
+    const img = tile && tile.querySelector("img");
+    if (!img || !img.src) return;
 
-      const action = btn.dataset.btn;
-
-      if (action === "continue") {
-        if (creditsTransitionLocked) return;
-
-        if (selectedNivel < 20) {
-          saveNivel(selectedNivel + 1);
-          stopAllAudio();
-          runAfterCredits(() => {
-            renderNivel();
-            nudgeChip();
-          });
-        } else {
-          nudgeChip();
-        }
-        return;
-      }
-
-      if (action === "exit") return exitProgram();
-      if (action === "choosel") return goNivelSelect();
-      if (action === "translate") return playOne(translationPath());
-
-      if (action === "goback") {
-        window.location.href = "../lagente.html";
-        return;
-      }
-
-      if (action === "email") {
-        showEmailOverlay();
-        return;
-      }
-
-      if (action === "help") { window.location.href = "../guide/guidelines.html"; return; }
-      if (action === "donate") return alert("Botón de donación todavía no programado.");
-    }, false);
+    const overlay = ensureImageMagnifier();
+    const bigImg = document.getElementById("imageMagnifierImg");
+    if (bigImg) {
+      bigImg.src = img.currentSrc || img.src;
+      bigImg.alt = img.alt || "Magnified lesson image";
+    }
+    overlay.hidden = false;
   }
 
-  function boot() {
-    const rows = readRequiredRows();
-    const buttons = readRequiredButtons();
-    if (!rows || !buttons) return;
+  document.addEventListener("pointerdown", ev => {
+    const tile = ev.target.closest && ev.target.closest("[data-group][data-index]");
+    if (!tile) return;
 
-    buildShell(rows, buttons);
-    applyPhoneStyle(styleConfig());
-    renderNivel();
-    attachButtonBehavior();
+    longHoldTriggered = false;
+    window.clearTimeout(longHoldTimer);
+    longHoldTimer = window.setTimeout(() => {
+      longHoldTriggered = true;
+      suppressNextTileClick = true;
+      try { navigator.vibrate && navigator.vibrate(18); } catch(e) {}
+      openImageMagnifier(tile);
+    }, LONG_HOLD_MS);
+  }, true);
+
+  function cancelLongHoldTimer(){
+    window.clearTimeout(longHoldTimer);
+    longHoldTimer = null;
   }
 
-  window.addEventListener("pagehide", stopAllAudio);
-  window.addEventListener("beforeunload", stopAllAudio);
+  document.addEventListener("pointerup", cancelLongHoldTimer, true);
+  document.addEventListener("pointercancel", cancelLongHoldTimer, true);
+  document.addEventListener("pointermove", ev => {
+    if (!longHoldTimer) return;
+    // If the finger drifts off the original frame area, cancel the pending magnifier.
+    const tile = ev.target.closest && ev.target.closest("[data-group][data-index]");
+    if (!tile) cancelLongHoldTimer();
+  }, true);
 
-  startAfterCredits();
+  document.addEventListener("contextmenu", ev => {
+    const tile = ev.target.closest && ev.target.closest("[data-group][data-index]");
+    if (tile) ev.preventDefault();
+  }, true);
+
+  document.addEventListener("click", ev => {
+    const tile = ev.target.closest && ev.target.closest("[data-group][data-index]");
+    if (!tile) return;
+
+    if (suppressNextTileClick || longHoldTriggered) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      suppressNextTileClick = false;
+      longHoldTriggered = false;
+    }
+  }, true);
+
+
+  // ----- Click handling -----
+  document.addEventListener("click", ev => {
+    const el = ev.target.closest("[data-group][data-index]");
+    if (!el) return;
+
+    const group = el.dataset.group;
+    const index = Number(el.dataset.index);
+
+    if (group === "expressions") {
+      lastPronSrc = null;
+      lastPronJoinable = false;
+      clearPronounSelection();
+      playRandomConversationPair();
+      return;
+    }
+
+    if (group === "pronouns") {
+      const src = pronAud(index);
+
+      if (isExpressionPronoun(index)) {
+        lastPronSrc = null;
+        lastPronJoinable = false;
+        clearPronounSelection();
+        playRandomConversationPair();
+      } else {
+        lastPronSrc = src;
+        lastPronJoinable = true;
+        selectPronounTile(el);
+        playSequence([src]);
+      }
+      return;
+    }
+
+    if (group === "objects") {
+      const srcObj = objAud(index);
+
+      if (lastPronSrc && lastPronJoinable) {
+        playSequence([lastPronSrc, srcObj]);
+        lastPronSrc = null;
+        lastPronJoinable = false;
+        clearPronounSelection();
+      } else {
+        playSequence([srcObj]);
+      }
+      return;
+    }
+  });
 })();
 </script>
+
+<script>
+function openContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = false;
+}
+
+function closeContactOverlay(){
+  const overlay = document.getElementById("contactOverlay");
+  if (overlay) overlay.hidden = true;
+}
+</script>
+
+<script>
+// ----- Bottom image-button actions -----
+(function(){
+  const pbar = document.getElementById("pbar");
+  if (!pbar) return;
+
+  function goTo(page){
+    window.location.href = page;
+  }
+
+  function currentLesson(){
+    const n = Number(sessionStorage.getItem("lesson") || "1");
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  const actions = {
+    continue(){
+      const lessonNow = currentLesson();
+      if (lessonNow >= 20) {
+        alert("You are already on the last lesson.");
+        return;
+      }
+
+      const nextLesson = lessonNow + 1;
+
+      // Keep all lesson storage names in agreement.
+      sessionStorage.setItem("lesson", String(nextLesson));
+      sessionStorage.setItem("selectedLesson", String(nextLesson));
+      sessionStorage.setItem("currentLesson", String(nextLesson));
+
+      localStorage.setItem("lesson", String(nextLesson));
+      localStorage.setItem("selectedLesson", String(nextLesson));
+      localStorage.setItem("currentLesson", String(nextLesson));
+
+      // Do not use window.location.reload() here.
+      // After returning from lagente.html, the URL still contains ?lesson=7.
+      // Reloading that same URL makes startup read lesson=7 again, so Button 1
+      // appears stuck on the same lesson. Go to a fresh URL with the next lesson.
+      window.location.href = "conductor.html?lesson=" + encodeURIComponent(nextLesson) + "&prep=" + Date.now();
+    },
+
+    exit(){
+      goTo("../quit.html");
+    },
+
+    choosel(){
+      goTo("lessonselect.html");
+    },
+
+    help(){
+      // Button 4: Help / Guidelines
+      // conductor.html is inside the desktop/phone folder.
+      // The guide folder is beside that folder, one level up from here.
+      goTo("../guide/guidelines.html");
+    },
+
+    email(){
+      openContactOverlay();
+    },
+
+    donate(){
+      goTo("donate.html");
+    },
+
+    lagente(){
+      const lesson = currentLesson();
+      const exactReturn = window.location.href;
+
+      // Save the exact phone conductor page that opened La Gente.
+      // lagente.html will use this first, so it does not have to guess paths.
+      sessionStorage.setItem("lesson", String(lesson));
+      sessionStorage.setItem("selectedLesson", String(lesson));
+      sessionStorage.setItem("currentLesson", String(lesson));
+      sessionStorage.setItem("lagenteReturnHref", exactReturn);
+
+      localStorage.setItem("lesson", String(lesson));
+      localStorage.setItem("selectedLesson", String(lesson));
+      localStorage.setItem("currentLesson", String(lesson));
+      localStorage.setItem("lagenteReturnHref", exactReturn);
+      localStorage.setItem("platicaLane", "phone");
+      localStorage.setItem("inglesyaLane", "phone");
+
+      goTo("../lagente.html?return=phone&lesson=" + encodeURIComponent(lesson));
+    },
+
+    translate(){
+      const lesson = currentLesson();
+      const player = document.getElementById("player");
+      if (!player) return;
+
+      player.src = `../group/lesson${lesson}/translation/a1.m4a`;
+      player.currentTime = 0;
+      player.play().catch(err => console.log("translation play failed:", err));
+    }
+  };
+
+  pbar.addEventListener("click", ev => {
+    const button = ev.target.closest(".buttonz[data-btn]");
+    if (!button) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const action = actions[button.dataset.btn];
+    if (action) action();
+  });
+})();
+</script>
+
+
+
+<script>
+// ----- Conductor preparation pause -----
+// The lesson select page only chooses the lesson. The visible pause/credits overlay
+// now belongs here, where the lesson itself is being prepared.
+(function(){
+  const minimumPauseMs = 2000;
+  const startedAt = Date.now();
+
+  function closePrepOverlay(){
+    const overlay = document.getElementById("prepOverlay");
+    if (overlay) overlay.classList.add("done");
+  }
+
+  function finishAfterMinimumPause(){
+    const elapsed = Date.now() - startedAt;
+    const remaining = Math.max(0, minimumPauseMs - elapsed);
+    window.setTimeout(closePrepOverlay, remaining);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", finishAfterMinimumPause, { once:true });
+  } else {
+    finishAfterMinimumPause();
+  }
+})();
+</script>
+
 </body>
 </html>

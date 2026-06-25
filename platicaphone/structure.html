@@ -1,217 +1,136 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plática Phone Structure</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f0f8ff;
-      color: #111;
-      overflow: hidden;
-    }
-    #notice {
-      position: fixed;
-      right: 8px;
-      top: 8px;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,.88);
-      border: 1px solid #bbb;
-      border-radius: 50%;
-      padding: 0;
-      font-size: 14px;
-      font-weight: 700;
-      z-index: 20;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>InglesYa Phone Structure</title>
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f5f7;
+    color: #222;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .message {
+    width: min(90vw, 360px);
+    background: white;
+    border: 1px solid #d7dbe3;
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+</style>
 </head>
 <body>
-  <div id="notice" aria-label="Nivel actual">1</div>
+  <main class="message">
+    Preparing the phone lesson layout...
+  </main>
+
 <script>
-(function () {
-  const storedNivel =
-    sessionStorage.getItem("selectedNivel") ||
-    sessionStorage.getItem("nivel") ||
-    sessionStorage.getItem("selectedLevel") ||
-    sessionStorage.getItem("level") ||
-    sessionStorage.getItem("currentLevel") ||
-    sessionStorage.getItem("selectedLesson") ||
-    sessionStorage.getItem("lesson") ||
-    sessionStorage.getItem("currentLesson") ||
-    "1";
+  // PHONE STRUCTURE BUILDER
+  // This page prepares the phone layout data, then sends the learner
+  // to lessonselect.html.
+  //
+  // Phone layout intention:
+  //   - preserve the same slot IDs and slot order
+  //   - preserve the 7 pronoun frames, 10 object frames, and 2 expression frames
+  //   - use the compact 3-4-3-4-3 visual row plan
+  //   - request approximately 20% larger frames
+  //   - request very small row gaps so the four-frame rows can nearly touch
+  //
+  // conductor.html is not changed by this file. If conductor.html reads the
+  // layoutConfig item below, it will receive the new phone layout instructions.
+  // If conductor.html has hard-coded frame CSS, that CSS will still control the
+  // final size and position.
+  window.addEventListener("DOMContentLoaded", function () {
+    const pronounSlots = [];
+    for (let i = 1; i <= 7; i++) {
+      pronounSlots.push({ id: i, kind: "main" });
+    }
 
-  const n = Number(storedNivel);
-  const nivelToUse = Number.isFinite(n) && n >= 1 && n <= 20 ? String(n) : "1";
+    const objectSlots = [];
+    for (let i = 1; i <= 10; i++) {
+      objectSlots.push({ id: i });
+    }
 
-  const notice = document.getElementById("notice");
-  if (notice) notice.textContent = nivelToUse;
+    const expressionSlots = [{ id: 8 }, { id: 9 }];
 
-  // Keep both the newer Nivel keys and the older lesson keys so older paths still work.
-  sessionStorage.setItem("lesson", nivelToUse);
-  sessionStorage.setItem("selectedLesson", nivelToUse);
-  sessionStorage.setItem("currentLesson", nivelToUse);
-  sessionStorage.setItem("level", nivelToUse);
-  sessionStorage.setItem("selectedLevel", nivelToUse);
-  sessionStorage.setItem("currentLevel", nivelToUse);
-  sessionStorage.setItem("nivel", nivelToUse);
-  sessionStorage.setItem("selectedNivel", nivelToUse);
-  sessionStorage.setItem("platicaMode", "phone");
-  sessionStorage.setItem("phoneMode", "1");
-  sessionStorage.removeItem("desktopMode");
-  if (!sessionStorage.getItem("tense")) sessionStorage.setItem("tense", "now");
+    const phoneLayoutConfig = {
+      layoutName: "phone-large-readable-3-column",
+      frameScale: 1.0,
+      rowGapPx: 5,
+      columnGapPx: 5,
+      allowFourFrameRowsToNearlyTouch: false,
+      preventScrolling: false,
+      preserveFrameOrder: true,
+      rows: [
+        { group: "pronouns", ids: [1, 2, 3] },
+        { group: "pronouns", ids: [4, 5, 6] },
+        { group: "pronouns", ids: [7] },
+        { group: "objects",  ids: [1, 2, 3] },
+        { group: "objects",  ids: [4, 5, 6] },
+        { group: "objects",  ids: [7, 8, 9] },
+        { group: "objects",  ids: [10] },
+        { group: "expressions", ids: [8, 9] }
+      ],
+      notes: "Use a 3-column readable phone layout. This deliberately allows vertical scrolling so the images are larger and clearer."
+    };
 
-  // PHONE STRUCTURE BLUEPRINT:
-  // This follows the current desktop model:
-  // pronouns/images/p1.png through p9.png are selectable pronoun/person frames.
-  // pronouns/images/p10.png and p11.png are expression frames and do not chain to objects.
-  // objects/images/p1.png through p10.png are object frames.
-  const phoneRows = [
-    { group: "pronouns", role: "pronoun",    columns: 3, ids: [1, 2, 3] },
-    { group: "pronouns", role: "pronoun",    columns: 3, ids: [4, 5, 6] },
-    { group: "pronouns", role: "pronoun",    columns: 3, ids: [7, 8, 9] },
-    { group: "pronouns", role: "expression", columns: 2, ids: [10, 11], shape: "circle" },
+    sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
+    sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
+    sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
+    sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
+    sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(phoneLayoutConfig));
 
-    { group: "gap", columns: 0, ids: [], height: "separator" },
+    if (!sessionStorage.getItem("tense")) {
+      sessionStorage.setItem("tense", "now");
+    }
 
-    { group: "objects",  role: "object",     columns: 3, ids: [1, 2, 3] },
-    { group: "objects",  role: "object",     columns: 4, ids: [4, 5, 6, 7] },
-    { group: "objects",  role: "object",     columns: 3, ids: [8, 9, 10] }
-  ];
+    const params = new URLSearchParams(window.location.search);
+    const shouldAutoStartLevel1 =
+      params.get("autoStartLevel1") === "1" ||
+      sessionStorage.getItem("autoStartLevel1") === "yes" ||
+      sessionStorage.getItem("firstTimeStart") === "yes" ||
+      localStorage.getItem("autoStartLevel1") === "yes" ||
+      localStorage.getItem("firstTimeStart") === "yes";
 
-  const buttonSlots = [
-    { action: "continue",  img: "../trigger/adelante.png",  alt: "Adelante",  title: "Continuar al siguiente nivel" },
-    { action: "exit",      img: "../trigger/exit.png",      alt: "Exit",      title: "Salir del programa" },
-    { action: "choosel",   img: "../trigger/choosel.png",   alt: "Niveles",   title: "Ir a selección de niveles" },
-    { action: "help",      img: "../trigger/help.png",      alt: "Help",      title: "Guidelines" },
-    { action: "donate",    img: "../trigger/donate.png",    alt: "Donate",    title: "Donar" },
-    { action: "email",     img: "../trigger/email.png",     alt: "Email",     title: "Email information" },
-    { action: "goback",    img: "../trigger/goback.png",    alt: "Back",      title: "Volver" },
-    { action: "translate", img: "../trigger/translate.png", alt: "Translate", title: "Traducir" }
-  ];
-
-  const phoneStyle = {
-    bodyBackground: "#f0f8ff",
-    boardTop: "0.35vh",
-    boardBottom: "8.6vh",
-    boardPadding: "0 3px",
-
-    // Slight horizontal and vertical breathing room between all frames.
-    rowGap: "0.35vh",
-    columnGap: "0.8vw",
-    frameGap: "0.8vw",
-    rowMaxWidth: "760px",
-
-    // Main/person/object frames reduced slightly so the new gaps fit cleanly.
-    boxWidth: "min(23.8vw, 12.6vh, 100px)",
-    boxHeight: "min(23.8vw, 12.6vh, 100px)",
-
-    // Circular expression frames reduced more noticeably.
-    expressionWidth: "min(18.5vw, 9.8vh, 78px)",
-    expressionHeight: "min(18.5vw, 9.8vh, 78px)",
-
-    gapHeight: "1.2vh",
-    gapMaxHeight: "16px",
-    buttonGap: "0.35vh",
-    buttonWidth: "10.8vw",
-    buttonHeight: "5vh",
-    buttonMaxHeight: "44px",
-    buttonBackground: "#d05000",
-
-    // Level badge: the structure supplies the little circle;
-    // the conductor only places the current number inside it.
-    showLevelBadge: true,
-    chipTextPrefix: "",
-    chipLabel: "",
-    chipNumberOnly: true,
-    chipPosition: "absolute",
-    chipLeft: "calc(50% + min(18.5vw, 9.8vh, 78px) + 0.4vw + 8px)",
-    chipTop: "50%",
-    chipRight: "auto",
-    chipBottom: "auto",
-    chipTransform: "translateY(-50%)",
-    chipWidth: "24px",
-    chipHeight: "24px",
-    chipBorderRadius: "50%",
-    chipFontSize: "13px",
-    chipBackground: "rgba(255,255,255,.92)",
-    chipBorder: "1px solid #bbb",
-    chipColor: "#111",
-    chipBoxShadow: "0 2px 6px rgba(0,0,0,.08)",
-    selectedOutline: "5px solid red"
-  };
-
-  sessionStorage.setItem("layoutRows", JSON.stringify(phoneRows));
-  sessionStorage.setItem("phoneLayoutRows", JSON.stringify(phoneRows));
-  sessionStorage.setItem("phoneLayout", JSON.stringify({ rows: phoneRows, buttons: buttonSlots, style: phoneStyle }));
-  sessionStorage.setItem("buttonSlots", JSON.stringify(buttonSlots));
-  sessionStorage.setItem("phoneStyle", JSON.stringify(phoneStyle));
-
-  // Tell the receiving page to show only the number, not the word Lesson or Nivel.
-  sessionStorage.setItem("levelBadgeText", nivelToUse);
-  sessionStorage.setItem("nivelBadgeText", nivelToUse);
-  sessionStorage.setItem("levelBadgePrefix", "");
-  sessionStorage.setItem("nivelBadgePrefix", "");
-  sessionStorage.setItem("levelBadgeNumberOnly", "1");
-
-  // Keep the phone lane separate from the desktop absolute-slot layout.
-  sessionStorage.removeItem("desktopSlots");
-  sessionStorage.removeItem("desktopLayout");
-  sessionStorage.removeItem("desktopStyle");
-
-  const params = new URLSearchParams(window.location.search);
-  const shouldAutoStartLevel1 =
-    params.get("autoStartLevel1") === "1" ||
-    sessionStorage.getItem("autoStartLevel1") === "yes" ||
-    sessionStorage.getItem("firstTimeStart") === "yes";
-
-  setTimeout(() => {
     if (shouldAutoStartLevel1) {
-      const nivel = "1";
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+      sessionStorage.setItem("currentLesson", "1");
+      localStorage.setItem("lesson", "1");
+      localStorage.setItem("selectedLesson", "1");
+      localStorage.setItem("currentLesson", "1");
 
-      // First-time startup uses this instruction one time only.
-      sessionStorage.setItem("lesson", nivel);
-      sessionStorage.setItem("selectedLesson", nivel);
-      sessionStorage.setItem("currentLesson", nivel);
-      sessionStorage.setItem("level", nivel);
-      sessionStorage.setItem("selectedLevel", nivel);
-      sessionStorage.setItem("currentLevel", nivel);
-      sessionStorage.setItem("nivel", nivel);
-      sessionStorage.setItem("selectedNivel", nivel);
-      sessionStorage.setItem("levelBadgeText", nivel);
-      sessionStorage.setItem("nivelBadgeText", nivel);
-      sessionStorage.setItem("platicaLane", "phone");
-
-      localStorage.setItem("lesson", nivel);
-      localStorage.setItem("selectedLesson", nivel);
-      localStorage.setItem("currentLesson", nivel);
-      localStorage.setItem("level", nivel);
-      localStorage.setItem("selectedLevel", nivel);
-      localStorage.setItem("currentLevel", nivel);
-      localStorage.setItem("nivel", nivel);
-      localStorage.setItem("selectedNivel", nivel);
-      localStorage.setItem("platicaLane", "phone");
-
+      // Use this instruction once. After conductor opens, normal lesson buttons
+      // should behave normally.
       sessionStorage.removeItem("autoStartLevel1");
       sessionStorage.removeItem("firstTimeStart");
       localStorage.removeItem("autoStartLevel1");
       localStorage.removeItem("firstTimeStart");
 
-      window.location.href = "conductor.html?lesson=1&prep=" + Date.now();
+      window.location.replace("conductor.html?lesson=1&prep=" + Date.now());
       return;
     }
 
-    window.location.href = "lessonselect.html";
-  }, 250);
-})();
+    if (!sessionStorage.getItem("lesson") && !sessionStorage.getItem("selectedLesson")) {
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+    }
+
+    window.location.replace("lessonselect.html");
+  });
 </script>
 </body>
 </html>
