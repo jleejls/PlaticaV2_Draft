@@ -353,40 +353,65 @@
   }
 </script>
 
+
 <script>
-  const AUDIO_BASE = './characters/audio/';
+  /*
+    Clean La Gente audio:
+    The real files are named 1.m4a through 7.m4a.
 
-  function playAny(n) {
-    const files = [
-      `${AUDIO_BASE}a${n}.m4a`,  // preferred lowercase extension
-      `${AUDIO_BASE}${n}.mp3`,  // fallback
-      `${AUDIO_BASE}${n}.wav`   // optional extra fallback
-    ];
+    This keeps the filenames simple, but it fixes the path problem by choosing
+    the correct characters/audio folder depending on where lagente.html is placed.
+  */
 
-    let i = 0;
-    let a = new Audio(files[i]);
+  function getCharacterAudioPath(n) {
+    const here = window.location.pathname.toLowerCase();
+    const fileName = n + ".m4a";
 
-    a.onerror = () => {
-      i++;
-      if (i < files.length) {
-        a = new Audio(files[i]);  // recreate with next file
-        a.play().catch(() => {});
-      }
-    };
+    // If lagente.html is inside platicaphone/ or platicadesktop/,
+    // characters/audio is one folder up.
+    if (here.includes("/platicaphone/") || here.includes("/platicadesktop/")) {
+      return "../characters/audios/" + fileName;
+    }
 
-    a.play().catch(() => {});
+    // Normal setup: lagente.html is in the PlaticaV2_Draft root.
+    return "./characters/audios/" + fileName;
   }
 
-  // Wire boxes 1–10 → play 1–10 from folder
+  function playAny(n) {
+    const player = document.getElementById("player");
+    if (!player) return;
+
+    const audioPath = getCharacterAudioPath(n);
+
+    player.pause();
+    player.removeAttribute("src");
+    player.load();
+
+    player.onerror = () => {
+      console.log("Could not load La Gente audio:", audioPath);
+    };
+
+    player.src = audioPath;
+    player.load();
+
+    player.play().catch((err) => {
+      console.log("Could not play La Gente audio:", audioPath, err);
+    });
+  }
+
+  // Wire boxes 1–7 → play character audio 1.m4a through 7.m4a.
   for (let n = 1; n <= 7; n++) {
-    const el = document.getElementById('box' + n);
+    const el = document.getElementById("box" + n);
     if (!el) continue;
-    el.style.cursor = 'pointer';
-    el.setAttribute('role', 'button');
-    el.setAttribute('tabindex', '0');
-    el.addEventListener('click', () => playAny(n));
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+
+    el.style.cursor = "pointer";
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+
+    el.addEventListener("click", () => playAny(n));
+
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         playAny(n);
       }
