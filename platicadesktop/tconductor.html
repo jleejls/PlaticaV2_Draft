@@ -369,15 +369,7 @@
   }
 
   function jpgOnlyPath(src) {
-    let value = String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
-
-    // If structure stored trigger paths as root-level "trigger/...",
-    // conductor.html is one folder lower in /platicadesktop/, so step up once.
-    if (/^trigger\//i.test(value)) {
-      value = "../" + value;
-    }
-
-    return value;
+    return String(src || "").replace(/\.(?:p)(?:n)(?:g)(?=([?#]|$))/gi, ".jpg");
   }
 
   function buildShell(slots, buttons) {
@@ -446,89 +438,30 @@
     return "../group/lesson" + selectedLesson;
   }
 
-  function uniquePaths(paths) {
-    return paths.filter((path, index, arr) => path && arr.indexOf(path) === index);
-  }
-
-  function imageExtensions(path) {
-    const value = String(path || "");
-    if (!value) return [];
-
-    return uniquePaths([
-      value,
-      value.replace(/\.jpg(?=([?#]|$))/i, ".jpeg"),
-      value.replace(/\.jpg(?=([?#]|$))/i, ".png")
-    ]);
-  }
-
-  function imageRoots() {
-    // Desktop conductor lives in /platicadesktop/.
-    // Audio already proves ../group/lessonN is the correct main road.
-    // The two extra roots match the proven phone conductor's safety routes.
-    return uniquePaths([
-      lessonRoot(),
-      "../../group/lesson" + selectedLesson,
-      "group/lesson" + selectedLesson
-    ]);
-  }
-
-  function imagePathCandidates(group, id) {
+  function imagePath(group, id) {
+    // Fast-clean exact desktop paths.
+    // This conductor lives in /platicadesktop/, so ../group/lessonN is the lesson root.
+    const root = lessonRoot();
     const n = Number(id);
-    const paths = [];
 
-    imageRoots().forEach(root => {
-      let baseCandidates = [];
+    if (group === "pronouns") {
+      return root + "/pronouns/images/p" + n + ".jpg";
+    }
 
-      if (group === "pronouns") {
-        baseCandidates = [
-          root + "/pronouns/images/p" + n + ".jpg",
-          root + "/pronouns/images/img_" + n + ".jpg",
-          root + "/pronouns/image/p" + n + ".jpg",
-          root + "/image/p" + (n + 10) + ".jpg",
-          root + "/image/p" + n + ".jpg"
-        ];
-      } else if (group === "objects") {
-        baseCandidates = [
-          root + "/objects/images/p" + n + ".jpg",
-          root + "/objects/images/img_" + n + ".jpg",
-          root + "/objects/image/p" + n + ".jpg",
-          root + "/objects/image/o" + n + ".jpg",
-          root + "/image/p" + n + ".jpg",
-          root + "/image/o" + n + ".jpg",
-          root + "/image/p" + (n + 9) + ".jpg",
-          root + "/image/p" + (n + 10) + ".jpg"
-        ];
-      } else {
-        baseCandidates = [
-          root + "/" + group + "/images/p" + n + ".jpg",
-          root + "/" + group + "/image/p" + n + ".jpg",
-          root + "/image/p" + n + ".jpg"
-        ];
-      }
+    if (group === "objects") {
+      return root + "/objects/images/p" + n + ".jpg";
+    }
 
-      baseCandidates.forEach(path => {
-        paths.push(...imageExtensions(path));
-      });
-    });
-
-    return uniquePaths(paths);
+    return root + "/" + group + "/images/p" + n + ".jpg";
   }
 
-  function setImageFromCandidates(img, candidates, label) {
-    const sources = Array.isArray(candidates) ? candidates : [candidates];
-    let index = 0;
-
+  function setImageExact(img, src, label) {
     img.onerror = () => {
-      index += 1;
-      if (index < sources.length) {
-        img.src = sources[index];
-      } else {
-        console.warn("Missing lesson image:", label || img.alt, sources);
-      }
+      console.warn("Missing lesson image:", label || img.alt, src);
     };
 
-    if (sources.length && img.getAttribute("src") !== sources[0]) {
-      img.src = sources[0];
+    if (img.getAttribute("src") !== src) {
+      img.src = src;
     }
   }
 
@@ -607,7 +540,7 @@
       const group = box.dataset.group;
       const id = Number(box.dataset.id);
       const img = box.querySelector("img");
-      if (img) setImageFromCandidates(img, imagePathCandidates(group, id), group + " " + id);
+      if (img) setImageExact(img, imagePath(group, id), group + " " + id);
     });
   }
 
