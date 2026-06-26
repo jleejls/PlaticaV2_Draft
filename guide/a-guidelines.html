@@ -54,7 +54,8 @@
       color: var(--muted);
     }
 
-    .return-btn {
+    .return-btn,
+    .play-btn {
       border: none;
       border-radius: 14px;
       padding: 12px 18px;
@@ -70,7 +71,13 @@
       color: var(--yellow-ink);
     }
 
+    .play-btn {
+      background: #d7f0ff;
+      color: #143a55;
+    }
+
     .return-btn:hover,
+    .play-btn:hover,
     .guide-btn:hover {
       transform: translateY(-1px);
       box-shadow: 0 7px 18px rgba(0,0,0,0.16);
@@ -155,7 +162,8 @@
     }
 
     audio {
-      display: none;
+      width: 100%;
+      margin-top: 10px;
     }
 
     .close-note {
@@ -202,11 +210,14 @@
   <div class="overlay" id="overlay" aria-hidden="true">
     <div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
       <h2 id="dialogTitle">Guideline</h2>
-      <p id="dialogText">Choose a guideline button to hear its audio.</p>
+      <p id="dialogText">Choose a guideline button to load its audio.</p>
 
       <div class="audio-box">
         <strong>Audio Guideline</strong>
-        <audio id="guideAudio" preload="auto"></audio>
+        <div class="controls-row">
+          <button class="play-btn" id="playBtn" type="button">Play Audio</button>
+        </div>
+        <audio id="guideAudio" controls preload="metadata"></audio>
         <div class="status" id="audioStatus"></div>
       </div>
 
@@ -221,21 +232,21 @@
     // Therefore the correct audio path from this page is: ./audio/filename.m4a
 
     const guidelines = [
-      { key: "guide01", title: "Other Studies", audio: "./audio/how_to.m4a" },
-      { key: "guide02", title: "Dale Una Oportunidad", audio: "./audio/dale_una_oportunidad.m4a" },
-      { key: "guide03", title: "Los Botones", audio: "./audio/the_buttons.m4a" },
-      { key: "guide04", title: "El Presente", audio: "./audio/present_tense.m4a" },
+      { key: "guide01", title: "How To", audio: "./audio/how_to.m4a" },
+      { key: "guide02", title: "Give It A Chance", audio: "./audio/dale_una_oportunidad.m4a" },
+      { key: "guide03", title: "The Buttons", audio: "./audio/the_buttons.m4a" },
+      { key: "guide04", title: "The Present", audio: "./audio/present_tense.m4a" },
       { key: "guide05", title: "Plática", audio: "./audio/chat_only.m4a" },
-      { key: "guide06", title: "Tu Tesoro Escondido", audio: "./audio/past_spanish.m4a" },
-      { key: "guide07", title: "No Traducción", audio: "./audio/notranslating.m4a" },
-      { key: "guide08", title: "Los Tres Cuartos", audio: "./audio/three_rooms.m4a" },
-      { key: "guide09", title: "La Isla Desierta", audio: "./audio/desert_island.m4a" },
-      { key: "guide10", title: "Piensa en Español", audio: "./audio/thinking_spanish.m4a" },
-      { key: "guide11", title: "Ser/Estar", audio: "./audio/to_be.m4a" },
+      { key: "guide06", title: "Other Studies", audio: "./audio/past_spanish.m4a" },
+      { key: "guide07", title: "No Translation", audio: "./audio/notranslating.m4a" },
+      { key: "guide08", title: "The Three Rooms", audio: "./audio/three_rooms.m4a" },
+      { key: "guide09", title: "The Desert Island", audio: "./audio/desert_island.m4a" },
+      { key: "guide10", title: "Think In Spanish", audio: "./audio/thinking_spanish.m4a" },
+      { key: "guide11", title: "To Be", audio: "./audio/to_be.m4a" },
       { key: "guide12", title: "Like y Gustar", audio: "./audio/gustar.m4a" },
-      { key: "guide13", title: "Hazle trampa a tu memoria", audio: "./audio/trick_memory.m4a" },
+      { key: "guide13", title: "Trick Your Memory", audio: "./audio/trick_memory.m4a" },
       { key: "guide14", title: "Yo Tener Hambre", audio: "./audio/yo_tener_hambre.m4a" },
-      { key: "guide15", title: "El Español Canta", audio: "./audio/spanish_sings.m4a" }
+      { key: "guide15", title: "Spanish Sings", audio: "./audio/spanish_sings.m4a" }
     ];
 
     const buttonArea = document.getElementById("buttonArea");
@@ -246,6 +257,7 @@
     const guideAudio = document.getElementById("guideAudio");
     const audioStatus = document.getElementById("audioStatus");
     const returnToDirector = document.getElementById("returnToDirector");
+    const playBtn = document.getElementById("playBtn");
 
     let currentAudioPath = "";
 
@@ -281,7 +293,7 @@
 
     function openGuideline(item) {
       dialogTitle.textContent = item.title;
-      dialogText.textContent = "Playing this guideline now.";
+      dialogText.textContent = "Press Play Audio to hear this guideline.";
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden", "false");
 
@@ -289,11 +301,7 @@
       currentAudioPath = item.audio;
       guideAudio.src = currentAudioPath;
       guideAudio.load();
-      audioStatus.textContent = "Loading: " + currentAudioPath;
-
-      // Because this function is called directly by the user's button click,
-      // the browser allows the audio to start without a second Play button.
-      playCurrentAudio();
+      audioStatus.textContent = "Ready: " + currentAudioPath;
     }
 
     function closeOverlay() {
@@ -318,10 +326,11 @@
         audioStatus.textContent = "Playing: " + currentAudioPath;
       } catch (err) {
         console.error(err);
-        audioStatus.textContent = "Audio did not start. Check the file path or tap the guide button again.";
+        audioStatus.textContent = "Audio did not start. Use the audio player's play button.";
       }
     }
 
+    playBtn.addEventListener("click", playCurrentAudio);
 
     guideAudio.addEventListener("play", () => {
       if (currentAudioPath) audioStatus.textContent = "Playing: " + currentAudioPath;

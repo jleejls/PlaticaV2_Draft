@@ -3,421 +3,450 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The People (La Gente)</title>
+  <title>La Gente</title>
   <style>
     * {
-      font-size: 1.2rem;
-      font-weight: bold;
+      box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
       overflow-x: hidden;
-      box-sizing: border-box;
-      padding: 3vh 2vw 12vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef8ff;
     }
 
-    .people-grid {
-      width: 100vw;
-      max-width: 1100px;
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
-      row-gap: clamp(12px, 3vh, 28px);
-    }
-
-    .people-row {
-      width: fit-content;
-      max-width: 100vw;
-      display: grid;
       justify-content: center;
+      padding: 4vh 2vw 11vh;
+    }
+
+    /*
+      La Gente now owns its own structure.
+      It does not borrow the conductor structure and it does not use lesson images.
+      It pulls only from the root characters folder:
+        ./characters/images/P1.jpg through P9.jpg
+        ./characters/audios/1.m4a through 10.m4a
+    */
+
+    .gente-stage {
+      width: min(96vw, 1050px);
+      min-height: min(76vh, 700px);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(110px, 1fr));
+      grid-template-rows: repeat(3, minmax(110px, 1fr));
+      column-gap: clamp(42px, 12vw, 160px);
+      row-gap: clamp(18px, 3vh, 34px);
+      align-items: center;
       justify-items: center;
-      column-gap: 2px;
-      row-gap: 2px;
     }
 
-    .top-row {
-      grid-template-columns: repeat(3, max-content);
-    }
-
-    .bottom-row {
-      grid-template-columns: repeat(4, max-content);
-    }
-
-    .box {
-      position: relative;
-      width: clamp(62px, 23vw, 170px);
+    .person-card {
+      width: clamp(105px, 12vw, 150px);
       aspect-ratio: 1 / 1;
-      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
-      transition: box-shadow 0.2s ease, outline 0.2s ease;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
     }
 
-    @media (min-width: 701px) {
-      .box {
-        width: clamp(90px, 14vw, 170px);
-      }
-    }
-
-    .box.selected {
-      outline: 3px solid gold;
-      z-index: 9999;
-    }
-
-    .box img {
+    .person-card img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      transition: none !important;
-      transform: none !important;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
-    .button-bar {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
+    .person-card:focus-visible,
+    .person-card.selected {
+      outline: 4px solid gold;
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    .return-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 18px;
       display: flex;
       justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
+      pointer-events: none;
     }
 
-    .rounded-box {
-      width: 300px;
-      padding: 20px;
-      background-color: #f0f0f0;
-      border-radius: 20px;
-      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-      font-family: sans-serif;
-    }
-
-    button {
-      font-size: 18px;
-      background-color: #007BFF;
+    .continue-button {
+      pointer-events: auto;
+      min-width: 150px;
+      min-height: 48px;
+      border: 2px solid #1ca53a;
+      border-radius: 12px;
+      background: #e86f00;
       color: white;
-      border: none;
-      border-radius: 8px;
+      font-size: 1.15rem;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      padding: 10px 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .continue-button:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 3vh 1vw 12vh;
+      }
+
+      .gente-stage {
+        width: 98vw;
+        min-height: 72vh;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: clamp(8px, 4vw, 22px);
+        row-gap: clamp(10px, 2.5vh, 22px);
+      }
+
+      .person-card {
+        width: clamp(86px, 29vw, 125px);
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- 7 interactive boxes with images: 3 on the first row, 4 on the second row -->
-  <main class="people-grid" aria-label="La Gente">
-    <section class="people-row top-row">
-      <div id="box1" class="box"><img src="./characters/images/p1.jpg" alt="1"></div>
-      <div id="box2" class="box"><img src="./characters/images/p2.jpg" alt="2"></div>
-      <div id="box3" class="box"><img src="./characters/images/p3.jpg" alt="3"></div>
-    </section>
+  <main id="genteStage" class="gente-stage" aria-label="La Gente"></main>
 
-    <section class="people-row bottom-row">
-      <div id="box4" class="box"><img src="./characters/images/p4.jpg" alt="4"></div>
-      <div id="box5" class="box"><img src="./characters/images/p5.jpg" alt="5"></div>
-      <div id="box6" class="box"><img src="./characters/images/p6.jpg" alt="6"></div>
-      <div id="box7" class="box"><img src="./characters/images/p7.jpg" alt="7"></div>
-    </section>
-  </main>
-
-  <!-- Return button (English) -->
-  <div style="text-align: center; margin-top: 24px;">
-    <button onclick="returnToConductor()">
-      Continuar
-    </button>
+  <div class="return-bar">
+    <button id="continueButton" class="continue-button" type="button">Continuar</button>
   </div>
 
-  <audio id="player"></audio>
+  <audio id="player" preload="auto"></audio>
 
-<script>
-  // La Gente has two different jobs:
-  // 1) Normal lesson use: return to the exact conductor page that opened La Gente.
-  // 2) First-time use: carry the welcome-page instruction to structure.html,
-  //    so structure prepares Level 1 and skips lessonselect.html.
-  function getSavedLessonNumber() {
-    const params = new URLSearchParams(window.location.search);
-    const rawLesson =
-      params.get("lesson") ||
-      sessionStorage.getItem("lesson") ||
-      sessionStorage.getItem("selectedLesson") ||
-      sessionStorage.getItem("currentLesson") ||
-      localStorage.getItem("lesson") ||
-      localStorage.getItem("selectedLesson") ||
-      localStorage.getItem("currentLesson") ||
-      "1";
+  <script>
+    const CHARACTER_COUNT = 9;
 
-    const n = Number(rawLesson);
-    return Number.isFinite(n) && n > 0 ? String(n) : "1";
-  }
+    function getRootPrefix() {
+      const here = window.location.pathname.toLowerCase();
 
-  function isFirstTimeStart(params) {
-    // Only the URL may trigger first-time routing here.
-    // Old session/localStorage first-time flags can stay behind and wrongly
-    // send a normal La Gente visit away from the active lesson.
-    return params.get("firstTime") === "1" ||
-      params.get("autoStartLevel1") === "1";
-  }
-
-  function getLane(params) {
-    const here = window.location.pathname.toLowerCase();
-    if (here.includes("/platicaphone/")) return "phone";
-    if (here.includes("/platicadesktop/")) return "desktop";
-
-    const rawLane =
-      params.get("lane") ||
-      sessionStorage.getItem("platicaLane") ||
-      localStorage.getItem("platicaLane") ||
-      sessionStorage.getItem("inglesyaLane") ||
-      localStorage.getItem("inglesyaLane") ||
-      (window.innerWidth < 700 ? "phone" : "desktop");
-
-    return rawLane === "phone" ? "phone" : "desktop";
-  }
-
-  function storeLessonOneForFirstTime(lane) {
-    const lesson = "1";
-
-    // First-time path must not use an old conductor return address.
-    sessionStorage.removeItem("lagenteReturnHref");
-    localStorage.removeItem("lagenteReturnHref");
-
-    sessionStorage.setItem("firstTimeStart", "yes");
-    sessionStorage.setItem("autoStartLevel1", "yes");
-    sessionStorage.setItem("lesson", lesson);
-    sessionStorage.setItem("selectedLesson", lesson);
-    sessionStorage.setItem("currentLesson", lesson);
-    sessionStorage.setItem("platicaLane", lane);
-    sessionStorage.setItem("inglesyaLane", lane);
-
-    localStorage.setItem("firstTimeStart", "yes");
-    localStorage.setItem("autoStartLevel1", "yes");
-    localStorage.setItem("lesson", lesson);
-    localStorage.setItem("selectedLesson", lesson);
-    localStorage.setItem("currentLesson", lesson);
-    localStorage.setItem("platicaLane", lane);
-    localStorage.setItem("inglesyaLane", lane);
-  }
-
-  function goToFirstTimeStructure(params) {
-    const lane = getLane(params);
-    storeLessonOneForFirstTime(lane);
-
-    const structurePath = lane === "phone"
-      ? "./platicaphone/structure.html"
-      : "./platicadesktop/structure.html";
-
-    window.location.href = structurePath + "?autoStartLevel1=1&lesson=1";
-  }
-
-  function hasPhoneLayoutConfig() {
-    return !!(
-      sessionStorage.getItem("phoneLayoutConfig") ||
-      localStorage.getItem("phoneLayoutConfig")
-    );
-  }
-
-  function isWideDesktopView() {
-    return window.innerWidth >= 701;
-  }
-
-  function shouldAvoidPhoneConductor() {
-    // The phone conductor is intentionally modular. On a normal wide desktop
-    // view it can fail if phoneLayoutConfig has not been prepared by the
-    // phone structure page. In that case, return to desktop conductor instead.
-    return isWideDesktopView() && !hasPhoneLayoutConfig();
-  }
-
-  function cleanBadLaGenteReturnStorage() {
-    const keys = ["lagenteReturnHref"];
-    for (const key of keys) {
-      const s = sessionStorage.getItem(key) || "";
-      const l = localStorage.getItem(key) || "";
-      const st = s.toLowerCase();
-      const lt = l.toLowerCase();
-      if (st.includes("lessonselect") || (shouldAvoidPhoneConductor() && st.includes("platicaphone/conductor"))) sessionStorage.removeItem(key);
-      if (lt.includes("lessonselect") || (shouldAvoidPhoneConductor() && lt.includes("platicaphone/conductor"))) localStorage.removeItem(key);
-    }
-  }
-
-  function getGoodReturnUrl(raw) {
-    if (!raw) return null;
-
-    try {
-      const url = new URL(raw, window.location.href);
-      const path = url.pathname.toLowerCase();
-
-      // Never let La Gente return to itself or to lessonselect.
-      // That was the trap that sent the user away from the active lesson.
-      if (path.includes("lagente") || path.includes("lessonselect")) return null;
-
-      // Do not return a normal wide desktop view to the phone conductor unless
-      // the phone structure page has already prepared phoneLayoutConfig.
-      if (shouldAvoidPhoneConductor() && path.includes("platicaphone/conductor")) return null;
-
-      // The normal return target should be the active conductor/structure page.
-      if (path.includes("conductor") || path.includes("structure")) return url;
-
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function getFallbackConductorPath(lane) {
-    const here = window.location.pathname.toLowerCase();
-
-    // If this La Gente file is inside one of the lane folders, conductor.html
-    // is beside it. In that case ./platicaphone/conductor.html would be wrong.
-    if (here.includes("/platicaphone/") || here.includes("/platicadesktop/")) {
-      return "./conductor.html";
-    }
-
-    // If this La Gente file is in the project root, the lane folders are below it.
-    return lane === "phone"
-      ? "./platicaphone/conductor.html"
-      : "./platicadesktop/conductor.html";
-  }
-
-  function returnToConductor() {
-    const params = new URLSearchParams(window.location.search);
-
-    if (isFirstTimeStart(params)) {
-      goToFirstTimeStructure(params);
-      return;
-    }
-
-    cleanBadLaGenteReturnStorage();
-
-    const lesson = getSavedLessonNumber();
-
-    sessionStorage.setItem("lesson", lesson);
-    sessionStorage.setItem("selectedLesson", lesson);
-    sessionStorage.setItem("currentLesson", lesson);
-    localStorage.setItem("lesson", lesson);
-    localStorage.setItem("selectedLesson", lesson);
-    localStorage.setItem("currentLesson", lesson);
-
-    // Prefer the real page that opened La Gente. Reject lessonselect.html.
-    const returnCandidates = [
-      params.get("returnHref"),
-      document.referrer,
-      sessionStorage.getItem("lagenteReturnHref"),
-      localStorage.getItem("lagenteReturnHref")
-    ];
-
-    for (const candidate of returnCandidates) {
-      const url = getGoodReturnUrl(candidate);
-      if (!url) continue;
-
-      url.searchParams.set("lesson", lesson);
-      url.searchParams.set("selectedLesson", lesson);
-      url.searchParams.set("currentLesson", lesson);
-      url.searchParams.set("returnFromLaGente", "1");
-      url.searchParams.set("prep", Date.now());
-      window.location.href = url.href;
-      return;
-    }
-
-    // Emergency fallback: build the conductor path according to the folder
-    // where this La Gente file is actually running.
-    let requestedReturn =
-      params.get("return") ||
-      params.get("lane") ||
-      localStorage.getItem("platicaLane") ||
-      localStorage.getItem("inglesyaLane") ||
-      (window.innerWidth < 700 ? "phone" : "desktop");
-
-    // If a stale URL says return=phone but we are in normal desktop width and
-    // phoneLayoutConfig is missing, returning to phone conductor causes the
-    // red Phone structure error. In that case, go desktop.
-    if (requestedReturn === "phone" && shouldAvoidPhoneConductor()) {
-      requestedReturn = "desktop";
-    }
-
-    const lane = requestedReturn === "phone" ? "phone" : "desktop";
-    const conductorPath = getFallbackConductorPath(lane);
-
-    window.location.href =
-      conductorPath +
-      "?lesson=" + encodeURIComponent(lesson) +
-      "&selectedLesson=" + encodeURIComponent(lesson) +
-      "&currentLesson=" + encodeURIComponent(lesson) +
-      "&returnFromLaGente=1&prep=" + Date.now();
-  }
-</script>
-
-
-<script>
-  /*
-    Clean La Gente audio:
-    The real files are named 1.m4a through 7.m4a.
-
-    This keeps the filenames simple, but it fixes the path problem by choosing
-    the correct characters/audio folder depending on where lagente.html is placed.
-  */
-
-  function getCharacterAudioPath(n) {
-    const here = window.location.pathname.toLowerCase();
-    const fileName = n + ".m4a";
-
-    // If lagente.html is inside platicaphone/ or platicadesktop/,
-    // characters/audio is one folder up.
-    if (here.includes("/platicaphone/") || here.includes("/platicadesktop/")) {
-      return "../characters/audios/" + fileName;
-    }
-
-    // Normal setup: lagente.html is in the PlaticaV2_Draft root.
-    return "./characters/audios/" + fileName;
-  }
-
-  function playAny(n) {
-    const player = document.getElementById("player");
-    if (!player) return;
-
-    const audioPath = getCharacterAudioPath(n);
-
-    player.pause();
-    player.removeAttribute("src");
-    player.load();
-
-    player.onerror = () => {
-      console.log("Could not load La Gente audio:", audioPath);
-    };
-
-    player.src = audioPath;
-    player.load();
-
-    player.play().catch((err) => {
-      console.log("Could not play La Gente audio:", audioPath, err);
-    });
-  }
-
-  // Wire boxes 1–7 → play character audio 1.m4a through 7.m4a.
-  for (let n = 1; n <= 7; n++) {
-    const el = document.getElementById("box" + n);
-    if (!el) continue;
-
-    el.style.cursor = "pointer";
-    el.setAttribute("role", "button");
-    el.setAttribute("tabindex", "0");
-
-    el.addEventListener("click", () => playAny(n));
-
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        playAny(n);
+      // Correct normal setup: LaGente.html is in the PV2 root beside characters/.
+      // This fallback only protects you if a copy is accidentally placed inside
+      // platicadesktop/ or platicaphone/.
+      if (here.includes("/platicadesktop/") || here.includes("/platicaphone/")) {
+        return "../";
       }
+
+      return "./";
+    }
+
+    function getCharacterImagePath(n) {
+      return getRootPrefix() + "characters/images/P" + n + ".jpg";
+    }
+
+    function getLowercaseFallbackImagePath(n) {
+      return getRootPrefix() + "characters/images/p" + n + ".jpg";
+    }
+
+    function getCharacterAudioPath(n) {
+      return getRootPrefix() + "characters/audios/" + n + ".m4a";
+    }
+
+    function buildLaGenteStructure() {
+      const stage = document.getElementById("genteStage");
+      if (!stage) return;
+
+      stage.innerHTML = "";
+
+      for (let n = 1; n <= CHARACTER_COUNT; n++) {
+        const button = document.createElement("button");
+        button.className = "person-card";
+        button.id = "person" + n;
+        button.type = "button";
+        button.setAttribute("aria-label", "Persona " + n);
+        button.dataset.audioNumber = String(n);
+
+        const img = document.createElement("img");
+        img.src = getCharacterImagePath(n);
+        img.alt = String(n);
+
+        // GitHub Pages is case-sensitive. The correct requested name is P1.jpg,
+        // but this protects local test copies that still use p1.jpg.
+        img.onerror = function () {
+          const fallback = getLowercaseFallbackImagePath(n);
+          if (img.src.endsWith("/p" + n + ".jpg")) return;
+          img.src = fallback;
+        };
+
+        button.appendChild(img);
+        button.addEventListener("click", function () {
+          selectPerson(button);
+          playAudio(n);
+        });
+
+        stage.appendChild(button);
+      }
+    }
+
+    function selectPerson(button) {
+      document.querySelectorAll(".person-card.selected").forEach(function (el) {
+        el.classList.remove("selected");
+      });
+      button.classList.add("selected");
+    }
+
+    function playAudio(n) {
+      const player = document.getElementById("player");
+      if (!player) return Promise.resolve();
+
+      const audioPath = getCharacterAudioPath(n);
+
+      player.pause();
+      player.removeAttribute("src");
+      player.load();
+      player.onerror = function () {
+        console.log("Could not load La Gente audio:", audioPath);
+      };
+      player.src = audioPath;
+      player.load();
+
+      return player.play().catch(function (err) {
+        console.log("Could not play La Gente audio:", audioPath, err);
+      });
+    }
+  </script>
+
+  <script>
+    // Return logic preserved from the earlier La Gente file.
+    // The old file already protected against returning to lessonselect.html
+    // or accidentally returning a wide desktop view into the phone conductor.
+    function getSavedLessonNumber() {
+      const params = new URLSearchParams(window.location.search);
+      const rawLesson =
+        params.get("lesson") ||
+        sessionStorage.getItem("lesson") ||
+        sessionStorage.getItem("selectedLesson") ||
+        sessionStorage.getItem("currentLesson") ||
+        localStorage.getItem("lesson") ||
+        localStorage.getItem("selectedLesson") ||
+        localStorage.getItem("currentLesson") ||
+        "1";
+
+      const n = Number(rawLesson);
+      return Number.isFinite(n) && n > 0 ? String(n) : "1";
+    }
+
+    function isFirstTimeStart(params) {
+      return params.get("firstTime") === "1" ||
+        params.get("autoStartLevel1") === "1";
+    }
+
+    function getLane(params) {
+      const here = window.location.pathname.toLowerCase();
+      if (here.includes("/platicaphone/")) return "phone";
+      if (here.includes("/platicadesktop/")) return "desktop";
+
+      const rawLane =
+        params.get("lane") ||
+        sessionStorage.getItem("platicaLane") ||
+        localStorage.getItem("platicaLane") ||
+        sessionStorage.getItem("inglesyaLane") ||
+        localStorage.getItem("inglesyaLane") ||
+        (window.innerWidth < 700 ? "phone" : "desktop");
+
+      return rawLane === "phone" ? "phone" : "desktop";
+    }
+
+    function storeLessonOneForFirstTime(lane) {
+      const lesson = "1";
+
+      sessionStorage.removeItem("lagenteReturnHref");
+      localStorage.removeItem("lagenteReturnHref");
+
+      sessionStorage.setItem("firstTimeStart", "yes");
+      sessionStorage.setItem("autoStartLevel1", "yes");
+      sessionStorage.setItem("lesson", lesson);
+      sessionStorage.setItem("selectedLesson", lesson);
+      sessionStorage.setItem("currentLesson", lesson);
+      sessionStorage.setItem("platicaLane", lane);
+      sessionStorage.setItem("inglesyaLane", lane);
+
+      localStorage.setItem("firstTimeStart", "yes");
+      localStorage.setItem("autoStartLevel1", "yes");
+      localStorage.setItem("lesson", lesson);
+      localStorage.setItem("selectedLesson", lesson);
+      localStorage.setItem("currentLesson", lesson);
+      localStorage.setItem("platicaLane", lane);
+      localStorage.setItem("inglesyaLane", lane);
+    }
+
+    function goToFirstTimeStructure(params) {
+      const lane = getLane(params);
+      storeLessonOneForFirstTime(lane);
+
+      const structurePath = lane === "phone"
+        ? "./platicaphone/structure.html"
+        : "./platicadesktop/structure.html";
+
+      window.location.href = structurePath + "?autoStartLevel1=1&lesson=1";
+    }
+
+    function hasPhoneLayoutConfig() {
+      return !!(
+        sessionStorage.getItem("phoneLayoutConfig") ||
+        localStorage.getItem("phoneLayoutConfig")
+      );
+    }
+
+    function isWideDesktopView() {
+      return window.innerWidth >= 701;
+    }
+
+    function shouldAvoidPhoneConductor() {
+      return isWideDesktopView() && !hasPhoneLayoutConfig();
+    }
+
+    function cleanBadLaGenteReturnStorage() {
+      const keys = ["lagenteReturnHref"];
+      for (const key of keys) {
+        const s = sessionStorage.getItem(key) || "";
+        const l = localStorage.getItem(key) || "";
+        const st = s.toLowerCase();
+        const lt = l.toLowerCase();
+        if (st.includes("lessonselect") || (shouldAvoidPhoneConductor() && st.includes("platicaphone/conductor"))) sessionStorage.removeItem(key);
+        if (lt.includes("lessonselect") || (shouldAvoidPhoneConductor() && lt.includes("platicaphone/conductor"))) localStorage.removeItem(key);
+      }
+    }
+
+    function getGoodReturnUrl(raw) {
+      if (!raw) return null;
+
+      try {
+        const url = new URL(raw, window.location.href);
+        const path = url.pathname.toLowerCase();
+
+        if (path.includes("lagente") || path.includes("lessonselect")) return null;
+        if (shouldAvoidPhoneConductor() && path.includes("platicaphone/conductor")) return null;
+        if (path.includes("conductor") || path.includes("structure")) return url;
+
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getFallbackConductorPath(lane) {
+      const here = window.location.pathname.toLowerCase();
+
+      if (here.includes("/platicaphone/") || here.includes("/platicadesktop/")) {
+        return "./conductor.html";
+      }
+
+      return lane === "phone"
+        ? "./platicaphone/conductor.html"
+        : "./platicadesktop/conductor.html";
+    }
+
+    function returnToConductor() {
+      const params = new URLSearchParams(window.location.search);
+
+      if (isFirstTimeStart(params)) {
+        goToFirstTimeStructure(params);
+        return;
+      }
+
+      cleanBadLaGenteReturnStorage();
+
+      const lesson = getSavedLessonNumber();
+
+      sessionStorage.setItem("lesson", lesson);
+      sessionStorage.setItem("selectedLesson", lesson);
+      sessionStorage.setItem("currentLesson", lesson);
+      localStorage.setItem("lesson", lesson);
+      localStorage.setItem("selectedLesson", lesson);
+      localStorage.setItem("currentLesson", lesson);
+
+      const returnCandidates = [
+        params.get("returnHref"),
+        document.referrer,
+        sessionStorage.getItem("lagenteReturnHref"),
+        localStorage.getItem("lagenteReturnHref")
+      ];
+
+      for (const candidate of returnCandidates) {
+        const url = getGoodReturnUrl(candidate);
+        if (!url) continue;
+
+        url.searchParams.set("lesson", lesson);
+        url.searchParams.set("selectedLesson", lesson);
+        url.searchParams.set("currentLesson", lesson);
+        url.searchParams.set("returnFromLaGente", "1");
+        url.searchParams.set("prep", Date.now());
+        window.location.href = url.href;
+        return;
+      }
+
+      let requestedReturn =
+        params.get("return") ||
+        params.get("lane") ||
+        localStorage.getItem("platicaLane") ||
+        localStorage.getItem("inglesyaLane") ||
+        (window.innerWidth < 700 ? "phone" : "desktop");
+
+      if (requestedReturn === "phone" && shouldAvoidPhoneConductor()) {
+        requestedReturn = "desktop";
+      }
+
+      const lane = requestedReturn === "phone" ? "phone" : "desktop";
+      const conductorPath = getFallbackConductorPath(lane);
+
+      window.location.href =
+        conductorPath +
+        "?lesson=" + encodeURIComponent(lesson) +
+        "&selectedLesson=" + encodeURIComponent(lesson) +
+        "&currentLesson=" + encodeURIComponent(lesson) +
+        "&returnFromLaGente=1&prep=" + Date.now();
+    }
+  </script>
+
+  <script>
+    buildLaGenteStructure();
+
+    document.getElementById("continueButton").addEventListener("click", function () {
+      // Audio 10 is available for the Continuar button if you want it.
+      // If it is missing or blocked, the page still returns normally.
+      const player = document.getElementById("player");
+      const audioPath = getCharacterAudioPath(10);
+      let returned = false;
+
+      function goBackOnce() {
+        if (returned) return;
+        returned = true;
+        returnToConductor();
+      }
+
+      player.pause();
+      player.removeAttribute("src");
+      player.load();
+      player.src = audioPath;
+      player.load();
+      player.onended = goBackOnce;
+      player.onerror = goBackOnce;
+
+      player.play().then(function () {
+        setTimeout(goBackOnce, 1800);
+      }).catch(goBackOnce);
     });
-  }
-</script>
-  
+  </script>
+
 </body>
 </html>
