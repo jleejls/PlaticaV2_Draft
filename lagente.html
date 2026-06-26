@@ -36,15 +36,17 @@
     */
 
     .gente-stage {
-      width: min(96vw, 1050px);
-      min-height: min(76vh, 700px);
+      width: fit-content;
+      max-width: 98vw;
+      min-height: auto;
       display: grid;
-      grid-template-columns: repeat(3, minmax(110px, 1fr));
-      grid-template-rows: repeat(3, minmax(110px, 1fr));
-      column-gap: clamp(42px, 12vw, 160px);
-      row-gap: clamp(18px, 3vh, 34px);
+      grid-template-columns: repeat(3, max-content);
+      grid-template-rows: repeat(3, max-content);
+      column-gap: 2px;
+      row-gap: clamp(8px, 2vh, 18px);
       align-items: center;
       justify-items: center;
+      justify-content: center;
     }
 
     .person-card {
@@ -110,15 +112,17 @@
       }
 
       .gente-stage {
-        width: 98vw;
-        min-height: 72vh;
-        grid-template-columns: repeat(3, 1fr);
-        column-gap: clamp(8px, 4vw, 22px);
-        row-gap: clamp(10px, 2.5vh, 22px);
+        width: fit-content;
+        max-width: 98vw;
+        min-height: auto;
+        grid-template-columns: repeat(3, max-content);
+        column-gap: 2px;
+        row-gap: clamp(8px, 2vh, 16px);
+        justify-content: center;
       }
 
       .person-card {
-        width: clamp(86px, 29vw, 125px);
+        width: clamp(86px, 30vw, 125px);
       }
     }
   </style>
