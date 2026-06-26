@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Plática Phone Conductor - Final Clean</title>
+<title>Plática Phone Conductor - Modular 3-4 No Scroll</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <style>
   *{ box-sizing:border-box; }
@@ -27,7 +27,7 @@
   body{
     padding-bottom:62px; /* keeps bottom buttons from covering lower pictures */
     overflow-x:hidden;
-    overflow-y:auto;
+    overflow-y:hidden;
   }
 
 
@@ -73,7 +73,7 @@
   }
 
   .phone-layout-row.object-start-row{
-    margin-top:10px;
+    margin-top:3px;
   }
 
   .tile{
@@ -101,7 +101,7 @@
     pointer-events:none;
   }
 
-  .object-tile img{ transform:scale(1.12); }
+  .object-tile img{ transform:none; }
 
   .tile.selected{
     outline:4px solid #c00000;
@@ -452,28 +452,28 @@
 
 <div id="pbar" class="zipbutton" aria-label="Program buttons">
   <div class="buttonz" data-btn="continue" title="Continuar / next lesson">
-    <img src="../trigger/adelante.jpg" alt="Adelante">
+    <img data-trigger="adelante" src="../trigger/adelante.jpg" alt="Adelante">
   </div>
   <div class="buttonz" data-btn="exit" title="Exit" onclick="window.location.assign('../quit.html');">
-    <img src="../trigger/exit.jpg" alt="Exit">
+    <img data-trigger="exit" src="../trigger/exit.jpg" alt="Exit">
   </div>
   <div class="buttonz" data-btn="choosel" title="Choose lesson">
-    <img src="../trigger/choosel.jpg" alt="Choose lesson">
+    <img data-trigger="choosel" src="../trigger/choosel.jpg" alt="Choose lesson">
   </div>
   <div class="buttonz" data-btn="help" title="Help / guidelines">
-    <img src="../trigger/help.jpg" alt="Help">
+    <img data-trigger="help" src="../trigger/help.jpg" alt="Help">
   </div>
   <div class="buttonz" data-btn="donate" title="Donate">
-    <img src="../trigger/donate.jpg" alt="Donate">
+    <img data-trigger="donate" src="../trigger/donate.jpg" alt="Donate">
   </div>
     <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky">
-    <img src="../trigger/email.jpg" alt="Email">
+    <img data-trigger="email" src="../trigger/email.jpg" alt="Email">
   </div>
   <div class="buttonz" data-btn="lagente" title="La Gente">
-    <img src="../trigger/lagente.jpg" alt="La Gente">
+    <img data-trigger="lagente" src="../trigger/lagente.jpg" alt="La Gente">
   </div>
   <div class="buttonz" data-btn="translate" title="Translation">
-    <img src="../trigger/translate.jpg" alt="Translate">
+    <img data-trigger="translate" src="../trigger/translate.jpg" alt="Translate">
   </div>
 </div>
 
@@ -489,6 +489,11 @@
 
 <script>
 (function(){
+  // ----- STRICT MODULAR PHONE CONDUCTOR -----
+  // This conductor does NOT create, force, repair, or fallback to any layout.
+  // The phone structure page must write the required layout data into sessionStorage.
+  // If the required sessionStorage data is missing or invalid, stop with a clear error.
+
   // ----- Safe sessionStorage receiver -----
   // This conductor reads the structure page's instructions.
   // It does not repair, rewrite, resize, or reposition the stored layout.
@@ -522,60 +527,115 @@
   sessionStorage.setItem("lesson", String(lesson));
   sessionStorage.setItem("selectedLesson", String(lesson));
 
-  const phoneLayoutConfig = readJSON("phoneLayoutConfig", null);
-  const storedPronounSlots = readJSON("pronounSlots", []);
-  const storedObjectSlots = readJSON("objectSlots", []);
-  const storedExpressionSlots = readJSON("expressionSlots", []);
-  const exprIds = readJSON("expressionPronounIds", [8, 9]);
+  function failStructure(message){
+    document.body.classList.remove("layout-loading");
+    document.body.innerHTML = `
+      <main style="max-width:420px;margin:40px auto;padding:18px;border:2px solid #c00000;border-radius:14px;background:#fff;font-family:Arial,sans-serif;line-height:1.35;">
+        <h1 style="margin-top:0;color:#c00000;font-size:1.35rem;">Phone structure error</h1>
+        <p>${message}</p>
+        <p>This conductor is modular and will not create a backup layout. Run the phone structure page first so it can place the correct layout in sessionStorage.</p>
+      </main>`;
+    throw new Error(message);
+  }
 
-  // Display-only emergency fallbacks. These keep the page from going blank if
-  // structure.html was bypassed, but they are never written back into storage.
-  const pronounSlots = Array.isArray(storedPronounSlots) && storedPronounSlots.length
-    ? storedPronounSlots
-    : [1,2,3,4,5,6,7].map(id => ({ id, kind:"main" }));
+  function validSlots(name, slots){
+    if (!Array.isArray(slots) || !slots.length) failStructure("Missing or empty sessionStorage key: " + name);
+    slots.forEach((slot, index) => {
+      if (!slot || typeof slot !== "object" || !Number.isFinite(Number(slot.id))) {
+        failStructure("Invalid slot in sessionStorage key: " + name + " at index " + index);
+      }
+    });
+    return slots;
+  }
 
-  const objectSlots = Array.isArray(storedObjectSlots) && storedObjectSlots.length
-    ? storedObjectSlots
-    : [1,2,3,4,5,6,7,8,9,10].map(id => ({ id }));
+  function validLayoutConfig(config){
+    if (!config || typeof config !== "object") failStructure("Missing sessionStorage key: phoneLayoutConfig");
+    if (!Array.isArray(config.rows) || !config.rows.length) failStructure("phoneLayoutConfig.rows is missing or empty");
+    config.rows.forEach((row, index) => {
+      if (!row || typeof row !== "object") failStructure("Invalid row object at phoneLayoutConfig.rows[" + index + "]");
+      if (!["pronouns", "objects", "expressions"].includes(row.group)) failStructure("Invalid row group at phoneLayoutConfig.rows[" + index + "]");
+      if (!Array.isArray(row.ids) || !row.ids.length) failStructure("Missing ids at phoneLayoutConfig.rows[" + index + "]");
+      row.ids.forEach(id => {
+        if (!Number.isFinite(Number(id))) failStructure("Invalid id in phoneLayoutConfig.rows[" + index + "]");
+      });
+    });
+    return config;
+  }
 
-  const expressionSlots = Array.isArray(storedExpressionSlots) && storedExpressionSlots.length
-    ? storedExpressionSlots
-    : [8,9].map(id => ({ id }));
+  const phoneLayoutConfig = validLayoutConfig(readJSON("phoneLayoutConfig", null));
+  const pronounSlots = validSlots("pronounSlots", readJSON("pronounSlots", null));
+  const objectSlots = validSlots("objectSlots", readJSON("objectSlots", null));
+  const expressionSlots = validSlots("expressionSlots", readJSON("expressionSlots", null));
+  const exprIds = readJSON("expressionPronounIds", null);
+  if (!Array.isArray(exprIds) || !exprIds.length) failStructure("Missing or empty sessionStorage key: expressionPronounIds");
 
-  const layoutRows = phoneLayoutConfig && Array.isArray(phoneLayoutConfig.rows) && phoneLayoutConfig.rows.length
-    ? phoneLayoutConfig.rows
-    : [
-        { group:"pronouns", ids:[1,2,3] },
-        { group:"pronouns", ids:[4,5,6] },
-        { group:"pronouns", ids:[7] },
-        { group:"objects", ids:[1,2,3] },
-        { group:"objects", ids:[4,5,6] },
-        { group:"objects", ids:[7,8,9] },
-        { group:"objects", ids:[10] },
-        { group:"expressions", ids:[8,9] }
-      ];
+  const layoutRows = phoneLayoutConfig.rows;
+
+  function validateExactPhoneLayout(rows){
+    const expected = [
+      { group:"pronouns", ids:[1,2,3] },
+      { group:"pronouns", ids:[4,5,6,7] },
+      { group:"expressions", ids:[8,9] },
+      { group:"objects", ids:[1,2,3] },
+      { group:"objects", ids:[4,5,6,7] },
+      { group:"objects", ids:[8,9,10] }
+    ];
+
+    if (!Array.isArray(rows) || rows.length !== expected.length) {
+      failStructure("Wrong phone layout: expected 6 rows: pronouns 3+4, expressions 2, objects 3+4+3.");
+    }
+
+    expected.forEach((want, index) => {
+      const got = rows[index];
+      const gotIds = Array.isArray(got && got.ids) ? got.ids.map(Number) : [];
+      const wantIds = want.ids.map(Number);
+
+      if (!got || got.group !== want.group || gotIds.length !== wantIds.length ||
+          gotIds.some((id, i) => id !== wantIds[i])) {
+        failStructure("Wrong phone layout row " + (index + 1) +
+          ". Expected " + want.group + " [" + wantIds.join(",") + "].");
+      }
+    });
+  }
+
+  validateExactPhoneLayout(layoutRows);
 
   // Apply only the structure-provided layout values.
-  // These are not conductor decisions; they are the conductor obeying structure.html.
+  // The conductor does not invent rows or backup dimensions. It only calculates
+  // the largest size that fits the structure-provided rows on the visible screen.
   (function applyStructureLayout(){
     const root = document.documentElement;
-    const scale = phoneLayoutConfig ? numberOr(phoneLayoutConfig.frameScale, 1) : 1;
-    const rowGap = phoneLayoutConfig ? numberOr(phoneLayoutConfig.rowGapPx, 3) : 3;
-    const columnGap = phoneLayoutConfig ? numberOr(phoneLayoutConfig.columnGapPx, rowGap) : 4;
+    const scale = numberOr(phoneLayoutConfig.frameScale, 1);
+    const expressionScale = numberOr(phoneLayoutConfig.expressionScale, 0.72);
+    const rowGap = numberOr(phoneLayoutConfig.rowGapPx, 3);
+    const columnGap = numberOr(phoneLayoutConfig.columnGapPx, rowGap);
 
     const viewportWidth = Math.max(300, Math.min(window.innerWidth || 360, 430));
-    const largestRow = layoutRows.reduce((max, row) => Math.max(max, row && Array.isArray(row.ids) ? row.ids.length : 0), 1);
+    const viewportHeight = Math.max(420, window.innerHeight || 640);
+
+    const largestRow = layoutRows.reduce((max, row) => {
+      return Math.max(max, row && Array.isArray(row.ids) ? row.ids.length : 0);
+    }, 1);
+
     const usableWidth = viewportWidth - 10 - Math.max(0, largestRow - 1) * columnGap;
-    const baseFrameSize = Math.floor(usableWidth / largestRow);
+    const widthBasedFrame = Math.floor(usableWidth / largestRow);
 
-    // Big phone presentation: the largest row should be 3 frames, not 4.
-    // Four frames across forces everything down around 84px on a typical phone.
-    const requestedFrameSize = Math.floor(baseFrameSize * scale);
-    const maxFrameSize = Math.floor(usableWidth / largestRow);
-    const frameSize = Math.max(92, Math.min(requestedFrameSize, maxFrameSize));
-    const circleSize = Math.max(92, Math.min(118, Math.round(frameSize * 1.02)));
+    const normalRows = layoutRows.filter(row => row.group !== "expressions").length;
+    const expressionRows = layoutRows.filter(row => row.group === "expressions").length;
+    const totalRowGaps = Math.max(0, layoutRows.length - 1) * rowGap;
 
-    root.style.setProperty("--frame-size", frameSize + "px");
+    // Reserve enough space for the fixed trigger bar and small page padding.
+    const triggerBarReserve = 56;
+    const pagePaddingReserve = 14;
+    const usableHeight = viewportHeight - triggerBarReserve - pagePaddingReserve - totalRowGaps;
+
+    const heightUnits = normalRows + (expressionRows * expressionScale);
+    const heightBasedFrame = Math.floor(usableHeight / heightUnits);
+
+    const frameSize = Math.max(54, Math.min(widthBasedFrame, heightBasedFrame, 102) * scale);
+    const circleSize = Math.max(42, Math.round(frameSize * expressionScale));
+
+    root.style.setProperty("--frame-size", Math.floor(frameSize) + "px");
     root.style.setProperty("--gap", rowGap + "px");
     root.style.setProperty("--column-gap", columnGap + "px");
     root.style.setProperty("--circle-size", circleSize + "px");
@@ -583,9 +643,7 @@
     document.documentElement.style.overflowX = "hidden";
     document.body.style.overflowX = "hidden";
 
-    // The larger phone layout intentionally allows vertical scrolling.
-    // That is the tradeoff that makes the pictures readable instead of dinky.
-    if (phoneLayoutConfig && phoneLayoutConfig.preventScrolling) {
+    if (phoneLayoutConfig.preventScrolling === true) {
       document.documentElement.style.overflowY = "hidden";
       document.body.style.overflowY = "hidden";
     } else {
@@ -741,8 +799,12 @@
     return d;
   }
 
-  function findSlot(slots, id){
-    return slots.find(slot => Number(slot.id) === Number(id)) || { id };
+  function findSlot(slots, id, groupName){
+    const found = slots.find(slot => Number(slot.id) === Number(id));
+    if (!found) {
+      failStructure("Missing " + (groupName || "slot") + " id " + id + " in sessionStorage.");
+    }
+    return found;
   }
 
   const expressionTilesByIndex = {};
@@ -751,7 +813,7 @@
     let tile;
 
     if (group === "pronouns") {
-      const slot = findSlot(pronounSlots, id);
+      const slot = findSlot(pronounSlots, id, "pronoun");
       tile = makeTile(pronImg(slot.id), `p${slot.id}.jpg`, "pronoun-tile");
       tile.dataset.group = "pronouns";
       tile.dataset.index = slot.id;
@@ -760,7 +822,7 @@
     }
 
     if (group === "objects") {
-      const slot = findSlot(objectSlots, id);
+      const slot = findSlot(objectSlots, id, "object");
       tile = makeTile(objImg(slot.id), `o${slot.id}.jpg`, "object-tile");
       tile.dataset.group = "objects";
       tile.dataset.index = slot.id;
@@ -768,7 +830,7 @@
     }
 
     if (group === "expressions") {
-      const slot = findSlot(expressionSlots, id);
+      const slot = findSlot(expressionSlots, id, "expression");
       tile = makeTile(pronImg(slot.id), `expression p${slot.id}.jpg`, "expression-circle");
       tile.dataset.group = "expressions";
       tile.dataset.index = slot.id;
@@ -1311,6 +1373,43 @@ function closeContactOverlay(){
   } else {
     finishAfterMinimumPause();
   }
+})();
+</script>
+
+<script>
+// ----- Trigger button image path resolver -----
+// The lesson images are now modular; trigger images live outside the phone folder.
+// Try the known sibling trigger folder first, then the two alternate launch depths.
+// This affects only bottom button images, not lesson layout.
+(function(){
+  const triggerImgs = Array.from(document.querySelectorAll("img[data-trigger]"));
+  const roots = ["../trigger", "../../trigger", "trigger"];
+  const exts = ["jpg", "png", "jpeg"];
+
+  function candidates(name){
+    const list = [];
+    roots.forEach(root => {
+      exts.forEach(ext => list.push(root + "/" + name + "." + ext));
+    });
+    return list;
+  }
+
+  triggerImgs.forEach(img => {
+    const name = img.dataset.trigger;
+    const paths = candidates(name);
+    let index = 0;
+
+    img.onerror = function(){
+      index += 1;
+      if (index < paths.length) {
+        img.src = paths[index];
+      } else {
+        console.warn("Missing trigger image:", name, paths);
+      }
+    };
+
+    img.src = paths[index];
+  });
 })();
 </script>
 

@@ -177,57 +177,25 @@
 <script>
   function goToLesson(lessonNumber) {
     const lesson = String(lessonNumber);
+
+    // Lesson select must ONLY select the lesson.
+    // It must NOT create or overwrite phone structure/layout data.
+    // The phone structure page is the only module allowed to write layout.
     sessionStorage.setItem("selectedLesson", lesson);
     sessionStorage.setItem("lesson", lesson);
     sessionStorage.setItem("currentLesson", lesson);
 
-    // Phone layout for the 3-4-3-4-3 structure.
-    // This is refreshed every time to avoid stale storage from an older layout.
-    const pronounSlots = [];
-    for (let i = 1; i <= 7; i++) {
-      pronounSlots.push({ id: i, kind: "main" });
-    }
-
-    const objectSlots = [];
-    for (let i = 1; i <= 10; i++) {
-      objectSlots.push({ id: i });
-    }
-
-    const expressionSlots = [{ id: 8 }, { id: 9 }];
-
-    sessionStorage.setItem("pronounSlots", JSON.stringify(pronounSlots));
-    sessionStorage.setItem("objectSlots", JSON.stringify(objectSlots));
-    sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
-    sessionStorage.setItem("expressionPronounIds", JSON.stringify([8, 9]));
-
-    const phoneLayoutConfig = {
-      layoutName: "phone-large-readable-3-column",
-      frameScale: 1.0,
-      rowGapPx: 5,
-      columnGapPx: 5,
-      allowFourFrameRowsToNearlyTouch: false,
-      preventScrolling: false,
-      preserveFrameOrder: true,
-      rows: [
-        { group: "pronouns", ids: [1, 2, 3] },
-        { group: "pronouns", ids: [4, 5, 6] },
-        { group: "pronouns", ids: [7] },
-        { group: "objects",  ids: [1, 2, 3] },
-        { group: "objects",  ids: [4, 5, 6] },
-        { group: "objects",  ids: [7, 8, 9] },
-        { group: "objects",  ids: [10] },
-        { group: "expressions", ids: [8, 9] }
-      ],
-      notes: "Use a 3-column readable phone layout. This deliberately allows vertical scrolling so the images are larger and clearer."
-    };
-
-    sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(phoneLayoutConfig));
+    sessionStorage.setItem("selectedNivel", lesson);
+    sessionStorage.setItem("nivel", lesson);
+    sessionStorage.setItem("currentNivel", lesson);
+    sessionStorage.setItem("platicaMode", "phone");
+    sessionStorage.setItem("phoneMode", "1");
 
     if (!sessionStorage.getItem("tense")) {
       sessionStorage.setItem("tense", "now");
     }
 
-    window.location.href = "conductor.html";
+    window.location.href = "conductor.html?lesson=" + encodeURIComponent(lesson) + "&prep=" + Date.now();
   }
 </script>
 

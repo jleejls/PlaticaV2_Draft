@@ -380,6 +380,42 @@
     return value;
   }
 
+  function triggerButtonCandidates(src) {
+    const raw = String(src || "").replace(/\\/g, "/");
+    const file = raw.split("/").pop() || "";
+    const base = (file.split("?")[0].split("#")[0]).replace(/\.[^.]+$/, "");
+    const name = base || raw.replace(/\.[^.]+$/, "");
+    const roots = ["../trigger", "../../trigger", "trigger"];
+    const exts = ["jpg", "png", "jpeg"];
+    const list = [];
+
+    // Try the path provided by structure first, after converting png to jpg.
+    const direct = jpgOnlyPath(src);
+    if (direct) list.push(direct);
+
+    roots.forEach(root => {
+      exts.forEach(ext => list.push(root + "/" + name + "." + ext));
+    });
+
+    return list.filter((path, index, arr) => path && arr.indexOf(path) === index);
+  }
+
+  function setTriggerButtonImage(img, src) {
+    const paths = triggerButtonCandidates(src);
+    let index = 0;
+
+    img.onerror = () => {
+      index += 1;
+      if (index < paths.length) {
+        img.src = paths[index];
+      } else {
+        console.warn("Missing trigger button image:", src, paths);
+      }
+    };
+
+    img.src = paths[index] || "";
+  }
+
   function buildShell(slots, buttons) {
     document.body.innerHTML = "";
 
@@ -427,8 +463,8 @@
       b.title = btn.title;
 
       const img = document.createElement("img");
-      img.src = jpgOnlyPath(btn.img);
       img.alt = btn.alt || btn.title;
+      setTriggerButtonImage(img, btn.img);
       b.appendChild(img);
       pbar.appendChild(b);
     });
