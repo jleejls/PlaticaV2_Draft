@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Plática Phone Conductor - Modular 3-4 No Scroll</title>
+<title>Plática Phone Conductor - Compact 3x3 No Scroll</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <style>
   *{ box-sizing:border-box; }
@@ -12,6 +12,7 @@
     --gap:4px;
     --column-gap:5px;
     --circle-size:110px;
+    --object-size:82px;
     --button-height:39px;
   }
 
@@ -58,8 +59,9 @@
 
   .lesson-number-badge{
     position:fixed;
-    top:7px;
-    left:7px;
+    top:50%;
+    left:3px;
+    transform:translateY(-50%);
     z-index:70;
     width:24px;
     height:24px;
@@ -91,7 +93,11 @@
   }
 
   .pronoun-tile{ background:#fffdf7; }
-  .object-tile{ background:#f9fbff; }
+  .object-tile{
+    width:var(--object-size);
+    height:var(--object-size);
+    background:#f9fbff;
+  }
 
   .tile img{
     width:98%;
@@ -420,7 +426,7 @@
 <div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
   <div class="prep-card">
     <div class="prep-spinner" aria-hidden="true"></div>
-    <p class="prep-message">Your lesson is being prepared...</p>
+    <p class="prep-message">Your level is being prepared...</p>
     <p class="prep-credit">Created by Jimmy Self</p>
 
     <div class="prep-credits" aria-label="Credits">
@@ -439,7 +445,7 @@
 </div>
 
 
-<div id="lessonNumberBadge" class="lesson-number-badge" aria-label="Lesson number"></div>
+<div id="lessonNumberBadge" class="lesson-number-badge" aria-label="Level number"></div>
 
 <header id="banner">Phone Conductor</header>
 
@@ -574,15 +580,16 @@
   function validateExactPhoneLayout(rows){
     const expected = [
       { group:"pronouns", ids:[1,2,3] },
-      { group:"pronouns", ids:[4,5,6,7] },
-      { group:"expressions", ids:[8,9] },
+      { group:"pronouns", ids:[4,5,6] },
+      { group:"pronouns", ids:[7,8,9] },
+      { group:"expressions", ids:[10,11] },
       { group:"objects", ids:[1,2,3] },
       { group:"objects", ids:[4,5,6,7] },
       { group:"objects", ids:[8,9,10] }
     ];
 
     if (!Array.isArray(rows) || rows.length !== expected.length) {
-      failStructure("Wrong phone layout: expected 6 rows: pronouns 3+4, expressions 2, objects 3+4+3.");
+      failStructure("Wrong phone layout: expected 7 rows: pronouns 3+3+3, expressions 2, objects 3+4+3.");
     }
 
     expected.forEach((want, index) => {
@@ -606,36 +613,41 @@
   (function applyStructureLayout(){
     const root = document.documentElement;
     const scale = numberOr(phoneLayoutConfig.frameScale, 1);
-    const expressionScale = numberOr(phoneLayoutConfig.expressionScale, 0.72);
-    const rowGap = numberOr(phoneLayoutConfig.rowGapPx, 3);
+    const expressionScale = numberOr(phoneLayoutConfig.expressionScale, 0.56);
+    const objectScale = numberOr(phoneLayoutConfig.objectScale, 0.72);
+    const rowGap = numberOr(phoneLayoutConfig.rowGapPx, 2);
     const columnGap = numberOr(phoneLayoutConfig.columnGapPx, rowGap);
 
     const viewportWidth = Math.max(300, Math.min(window.innerWidth || 360, 430));
     const viewportHeight = Math.max(420, window.innerHeight || 640);
 
-    const largestRow = layoutRows.reduce((max, row) => {
-      return Math.max(max, row && Array.isArray(row.ids) ? row.ids.length : 0);
-    }, 1);
+    const rowWidthFrameLimit = layoutRows.reduce((limit, row) => {
+      const count = row && Array.isArray(row.ids) ? row.ids.length : 1;
+      const usableWidth = viewportWidth - 10 - Math.max(0, count - 1) * columnGap;
+      const rowScale = row.group === "objects" ? objectScale :
+                       row.group === "expressions" ? expressionScale : 1;
+      return Math.min(limit, Math.floor(usableWidth / (count * rowScale)));
+    }, 9999);
 
-    const usableWidth = viewportWidth - 10 - Math.max(0, largestRow - 1) * columnGap;
-    const widthBasedFrame = Math.floor(usableWidth / largestRow);
-
-    const normalRows = layoutRows.filter(row => row.group !== "expressions").length;
+    const pronounRows = layoutRows.filter(row => row.group === "pronouns").length;
+    const objectRows = layoutRows.filter(row => row.group === "objects").length;
     const expressionRows = layoutRows.filter(row => row.group === "expressions").length;
     const totalRowGaps = Math.max(0, layoutRows.length - 1) * rowGap;
 
     // Reserve enough space for the fixed trigger bar and small page padding.
     const triggerBarReserve = 56;
-    const pagePaddingReserve = 14;
+    const pagePaddingReserve = 10;
     const usableHeight = viewportHeight - triggerBarReserve - pagePaddingReserve - totalRowGaps;
 
-    const heightUnits = normalRows + (expressionRows * expressionScale);
+    const heightUnits = pronounRows + (expressionRows * expressionScale) + (objectRows * objectScale);
     const heightBasedFrame = Math.floor(usableHeight / heightUnits);
 
-    const frameSize = Math.max(54, Math.min(widthBasedFrame, heightBasedFrame, 102) * scale);
-    const circleSize = Math.max(42, Math.round(frameSize * expressionScale));
+    const frameSize = Math.max(48, Math.min(rowWidthFrameLimit, heightBasedFrame, 102) * scale);
+    const circleSize = Math.max(34, Math.round(frameSize * expressionScale));
+    const objectSize = Math.max(38, Math.round(frameSize * objectScale));
 
     root.style.setProperty("--frame-size", Math.floor(frameSize) + "px");
+    root.style.setProperty("--object-size", objectSize + "px");
     root.style.setProperty("--gap", rowGap + "px");
     root.style.setProperty("--column-gap", columnGap + "px");
     root.style.setProperty("--circle-size", circleSize + "px");
@@ -720,8 +732,8 @@
   // ----- Conversation-circle audio paths -----
   // Francisco uses the first expression circle, Rachel uses the second.
   // One click on either circle plays one two-part exchange, then stops.
-  const FRANCISCO_EXPRESSION_ID = (expressionSlots[0] && expressionSlots[0].id) || exprIds[0] || 8;
-  const RACHEL_EXPRESSION_ID = (expressionSlots[1] && expressionSlots[1].id) || exprIds[1] || 9;
+  const FRANCISCO_EXPRESSION_ID = (expressionSlots[0] && expressionSlots[0].id) || exprIds[0] || 10;
+  const RACHEL_EXPRESSION_ID = (expressionSlots[1] && expressionSlots[1].id) || exprIds[1] || 11;
 
   function conversationAud(speaker, role, number){
     const shortSpeaker = speaker === "francisco" ? "f" : "r";
