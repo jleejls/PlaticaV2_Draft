@@ -206,10 +206,112 @@
     font-weight:bold;
     margin:10px 0 14px;
   }
+
+  .prep-overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,247,223,0.96);
+    padding:18px;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+
+  .prep-overlay.done{
+    display:none;
+  }
+
+  .prep-card{
+    width:min(92vw,430px);
+    max-height:92vh;
+    overflow:auto;
+    background:#ffffff;
+    border:1px solid #d7c88a;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.22);
+    text-align:center;
+    padding:20px 16px;
+  }
+
+  .prep-spinner{
+    width:38px;
+    height:38px;
+    border:5px solid #ddd;
+    border-top-color:#007acc;
+    border-radius:50%;
+    margin:0 auto 12px;
+    animation:prepSpin 0.85s linear infinite;
+  }
+
+  @keyframes prepSpin{
+    to{ transform:rotate(360deg); }
+  }
+
+  .prep-message{
+    font-size:18px;
+    font-weight:700;
+    margin:0;
+    color:#3b3020;
+  }
+
+  .prep-credit{
+    font-size:13px;
+    margin:8px 0 0;
+    color:#665536;
+  }
+
+  .prep-credits{
+    margin:12px auto 0;
+    padding-top:10px;
+    border-top:1px solid #e4d8aa;
+    text-align:left;
+  }
+
+  .prep-credits h2{
+    margin:0 0 8px;
+    text-align:center;
+    font-size:1rem;
+    color:#3b3020;
+  }
+
+  .prep-credits ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+    font-size:0.82rem;
+    line-height:1.32;
+    color:#4d402b;
+  }
+
 </style>
 </head>
 
 <body class="layout-loading">
+
+<div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
+  <div class="prep-card">
+    <div class="prep-spinner" aria-hidden="true"></div>
+    <p class="prep-message">Your level is being prepared...</p>
+    <p class="prep-credit">Created by Jimmy Self</p>
+
+    <div class="prep-credits" aria-label="Credits">
+      <h2>Créditos</h2>
+      <ul>
+        <li><strong>Creador del proyecto:</strong> Jimmy Self</li>
+        <li><strong>Ayudante:</strong> AJ Cornell</li>
+        <li><strong>Diseño y Arte:</strong> José García</li>
+        <li><strong>Visuales:</strong> María Flores</li>
+        <li><strong>Male Voice:</strong> Jimmy Self</li>
+        <li><strong>Female Voice:</strong> Reina Maldonado</li>
+        <li><strong>Asesor de producción:</strong> Prof. Eduardo De León</li>
+        <li><strong>Actores:</strong> A.J. Cornell, Rachel Cornell</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 <div id="lessonNumberBadge" class="lesson-number-badge" aria-label="Level number"></div>
 <header id="banner">Phone Conductor</header>
 
@@ -245,6 +347,9 @@
 <script>
 (function(){
   "use strict";
+
+  const PREP_MINIMUM_MS = 2000;
+  const prepStartedAt = Date.now();
 
   function readJSON(key){
     const raw = sessionStorage.getItem(key);
@@ -494,11 +599,19 @@
 
   function revealWhenReady(){
     // Do not reveal a half-loaded phone board. Wait for every JPG loader to
-    // either succeed or mark the frame as truly missing.
+    // either succeed or mark the frame as truly missing. Keep the credits/spinner
+    // visible for a short opening delay so the transition is smooth.
     Promise.all(imageLoadJobs).then(() => {
-      requestAnimationFrame(() => {
-        document.body.classList.remove("layout-loading");
-      });
+      const elapsed = Date.now() - prepStartedAt;
+      const wait = Math.max(0, PREP_MINIMUM_MS - elapsed);
+
+      window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          const overlay = document.getElementById("prepOverlay");
+          if (overlay) overlay.classList.add("done");
+          document.body.classList.remove("layout-loading");
+        });
+      }, wait);
     });
   }
 
