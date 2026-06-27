@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>InglesYa Lesson Select</title>
+<title>Plática Level Select</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -139,55 +139,50 @@
 <body>
 
 <div class="lesson-page">
-  <div class="title-card">
-    <h1>InglesYa</h1>
-    <div class="subtitle">Select a lesson</div>
-  </div>
-
   <div class="lesson-grid">
-    <button class="lesson-button" onclick="goToLesson(1)">Lesson 1</button>
-    <button class="lesson-button" onclick="goToLesson(2)">Lesson 2</button>
-    <button class="lesson-button" onclick="goToLesson(3)">Lesson 3</button>
-    <button class="lesson-button" onclick="goToLesson(4)">Lesson 4</button>
+    <button class="lesson-button" onclick="goToLesson(1)">Level 1</button>
+    <button class="lesson-button" onclick="goToLesson(2)">Level 2</button>
+    <button class="lesson-button" onclick="goToLesson(3)">Level 3</button>
+    <button class="lesson-button" onclick="goToLesson(4)">Level 4</button>
 
-    <button class="lesson-button" onclick="goToLesson(5)">Lesson 5</button>
-    <button class="lesson-button" onclick="goToLesson(6)">Lesson 6</button>
-    <button class="lesson-button" onclick="goToLesson(7)">Lesson 7</button>
-    <button class="lesson-button" onclick="goToLesson(8)">Lesson 8</button>
+    <button class="lesson-button" onclick="goToLesson(5)">Level 5</button>
+    <button class="lesson-button" onclick="goToLesson(6)">Level 6</button>
+    <button class="lesson-button" onclick="goToLesson(7)">Level 7</button>
+    <button class="lesson-button" onclick="goToLesson(8)">Level 8</button>
 
-    <button class="lesson-button" onclick="goToLesson(9)">Lesson 9</button>
-    <button class="lesson-button" onclick="goToLesson(10)">Lesson 10</button>
-    <button class="lesson-button" onclick="goToLesson(11)">Lesson 11</button>
-    <button class="lesson-button" onclick="goToLesson(12)">Lesson 12</button>
+    <button class="lesson-button" onclick="goToLesson(9)">Level 9</button>
+    <button class="lesson-button" onclick="goToLesson(10)">Level 10</button>
+    <button class="lesson-button" onclick="goToLesson(11)">Level 11</button>
+    <button class="lesson-button" onclick="goToLesson(12)">Level 12</button>
 
-    <button class="lesson-button" onclick="goToLesson(13)">Lesson 13</button>
-    <button class="lesson-button" onclick="goToLesson(14)">Lesson 14</button>
-    <button class="lesson-button" onclick="goToLesson(15)">Lesson 15</button>
-    <button class="lesson-button" onclick="goToLesson(16)">Lesson 16</button>
+    <button class="lesson-button" onclick="goToLesson(13)">Level 13</button>
+    <button class="lesson-button" onclick="goToLesson(14)">Level 14</button>
+    <button class="lesson-button" onclick="goToLesson(15)">Level 15</button>
+    <button class="lesson-button" onclick="goToLesson(16)">Level 16</button>
 
-    <button class="lesson-button" onclick="goToLesson(17)">Lesson 17</button>
-    <button class="lesson-button" onclick="goToLesson(18)">Lesson 18</button>
-    <button class="lesson-button" onclick="goToLesson(19)">Lesson 19</button>
-    <button class="lesson-button" onclick="goToLesson(20)">Lesson 20</button>
+    <button class="lesson-button" onclick="goToLesson(17)">Level 17</button>
+    <button class="lesson-button" onclick="goToLesson(18)">Level 18</button>
+    <button class="lesson-button" onclick="goToLesson(19)">Level 19</button>
+    <button class="lesson-button" onclick="goToLesson(20)">Level 20</button>
   </div>
 
-  <div class="footer-note">Working lesson selector</div>
+  <div class="footer-note">Working level selector</div>
 </div>
 
 <script>
-  function goToLesson(lessonNumber) {
-    const lesson = String(lessonNumber);
+  function goToLesson(levelNumber) {
+    const level = String(levelNumber);
 
-    // Lesson select must ONLY select the lesson.
-    // It must NOT create or overwrite phone structure/layout data.
-    // The phone structure page is the only module allowed to write layout.
-    sessionStorage.setItem("selectedLesson", lesson);
-    sessionStorage.setItem("lesson", lesson);
-    sessionStorage.setItem("currentLesson", lesson);
+    // Level select must ONLY select the level.
+    // Keep these "lesson" keys for conductor compatibility.
+    // They are internal routing/storage names, not screen wording.
+    sessionStorage.setItem("selectedLesson", level);
+    sessionStorage.setItem("lesson", level);
+    sessionStorage.setItem("currentLesson", level);
 
-    sessionStorage.setItem("selectedNivel", lesson);
-    sessionStorage.setItem("nivel", lesson);
-    sessionStorage.setItem("currentNivel", lesson);
+    sessionStorage.setItem("selectedNivel", level);
+    sessionStorage.setItem("nivel", level);
+    sessionStorage.setItem("currentNivel", level);
     sessionStorage.setItem("platicaMode", "phone");
     sessionStorage.setItem("phoneMode", "1");
 
@@ -195,7 +190,7 @@
       sessionStorage.setItem("tense", "now");
     }
 
-    window.location.href = "conductor.html?lesson=" + encodeURIComponent(lesson) + "&prep=" + Date.now();
+    window.location.href = "conductor.html?lesson=" + encodeURIComponent(level) + "&prep=" + Date.now();
   }
 </script>
 
