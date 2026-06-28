@@ -31,8 +31,7 @@
   }
 
   body.layout-loading main,
-  body.layout-loading #pbar,
-  body.layout-loading #lessonNumberBadge{
+  body.layout-loading #pbar{
     visibility:hidden;
   }
 
@@ -118,23 +117,21 @@
     padding:3px;
     white-space:pre-line;
   }
-
-  .lesson-number-badge{
-    position:fixed;
-    top:50%;
-    left:3px;
-    transform:translateY(-50%);
-    z-index:70;
-    width:24px;
-    height:24px;
+  .level-number-badge{
+    width:30px;
+    height:30px;
     border:1px solid #d7dbe3;
     border-radius:50%;
-    background:rgba(255,255,255,.88);
+    background:rgba(255,255,255,.94);
     color:#333;
-    font:700 15px/24px Arial, Helvetica, sans-serif;
+    font:700 16px/30px Arial, Helvetica, sans-serif;
     text-align:center;
     pointer-events:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.14);
+    flex:0 0 auto;
+    margin-left:12px;
   }
+
 
   .zipbutton{
     position:fixed;
@@ -330,6 +327,7 @@
 
 <body class="layout-loading">
 
+
 <div id="prepOverlay" class="prep-overlay" aria-live="polite" aria-label="Lesson preparation message">
   <div class="prep-card">
     <div class="prep-spinner" aria-hidden="true"></div>
@@ -352,7 +350,6 @@
   </div>
 </div>
 
-<div id="lessonNumberBadge" class="lesson-number-badge" aria-label="Level number"></div>
 <header id="banner">Phone Conductor</header>
 
 <main>
@@ -397,6 +394,15 @@
 
   const PREP_MINIMUM_MS = 2000;
   const prepStartedAt = Date.now();
+  function makeLevelNumberBadge(n){
+    const badge = document.createElement("div");
+    badge.id = "levelNumberBadge";
+    badge.className = "level-number-badge";
+    badge.textContent = String(n);
+    badge.setAttribute("aria-label", "Level " + n);
+    return badge;
+  }
+
 
   function readJSON(key){
     const raw = sessionStorage.getItem(key);
@@ -621,8 +627,7 @@
 
   applyStructureLayout();
 
-  document.getElementById("banner").textContent = "Phone — Lesson " + lesson;
-  document.getElementById("lessonNumberBadge").textContent = String(lesson);
+  document.getElementById("banner").textContent = "Phone — Level " + lesson;
 
   const mount = document.getElementById("phoneLayoutMount");
   let previousGroup = null;
@@ -639,6 +644,10 @@
     rowSpec.ids.forEach(id => {
       row.appendChild(buildOneTile(rowSpec.group, id));
     });
+
+    if (rowSpec.group === "expressions") {
+      row.appendChild(makeLevelNumberBadge(lesson));
+    }
 
     mount.appendChild(row);
     previousGroup = rowSpec.group;

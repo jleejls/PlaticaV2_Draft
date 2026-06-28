@@ -77,18 +77,27 @@
       position: fixed;
       background: white;
       border: 1px solid #ddd;
-      border-radius: 50%;
-      width: 54px;
-      height: 54px;
+      border-radius: 18px;
+      min-width: 88px;
+      min-height: 58px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0;
+      gap: 2px;
+      padding: 7px 10px;
       font-weight: 700;
-      font-size: 1.05rem;
       box-shadow: 0 2px 6px rgba(0,0,0,.08);
       z-index: 51;
       user-select: none;
+      text-align: center;
+      line-height: 1.05;
+    }
+    .level-label {
+      font-size: 0.82rem;
+    }
+    .level-verb {
+      font-size: 1.02rem;
     }
 
     #creditsOverlay {
@@ -308,6 +317,23 @@
   let creditsTransitionLocked = false;
   let creditsTransitionTimer = null;
 
+  const VERBS = [
+    "Tener", "Querer", "Decir", "Estar", "Necesitar",
+    "Ir", "Saber", "Venir", "Comer", "Tomar", "Hablar",
+    "Ver", "Ser", "Poder", "Vivir", "Haber", "Dar", "Poner",
+    "Hacer", "Quedar"
+  ];
+
+  function lessonVerb(n) {
+    return VERBS[Number(n) - 1] || "";
+  }
+
+  function levelBadgeHTML(n) {
+    const verb = lessonVerb(n);
+    return '<div class="level-label">Level ' + n + '</div>' +
+           '<div class="level-verb">' + verb + '</div>';
+  }
+
   const MINIMUM_CREDITS_DELAY_MS = 2000; // Two-second opening delay
   const CREDITS_HTML = `<li><strong>Project Assistant:</strong> AJ Cornell</li>
       <li><strong>Male Voice:</strong> Jimmy Self</li>
@@ -472,9 +498,10 @@
       btn.style.background = style.buttonBackground || "#d05000";
     });
 
-    nivelcircle.style.right = style.nivelCircleRight || style.nivelCircleRight || "4vw";
-    nivelcircle.style.bottom = style.nivelCircleBottom || style.nivelCircleBottom || "11vh";
-
+    nivelcircle.style.left = "50vw";
+nivelcircle.style.right = "auto";
+nivelcircle.style.bottom = "11vh";
+nivelcircle.style.transform = "translateX(-50%)";
     document.querySelectorAll(".selected").forEach(el => {
       el.style.outline = style.selectedOutline || "5px solid red";
     });
@@ -740,7 +767,7 @@
 
     const nivelcircle = document.createElement("div");
     nivelcircle.id = "nivelcircle";
-    nivelcircle.textContent = String(selectedLesson);
+    nivelcircle.innerHTML = levelBadgeHTML(selectedLesson);
 
     document.body.appendChild(structure);
     document.body.appendChild(pbar);
@@ -905,7 +932,7 @@
     selectedLesson = readStoredLesson();
 
     const nivelcircle = document.getElementById("nivelcircle");
-    if (nivelcircle) nivelcircle.textContent = String(selectedLesson);
+    if (nivelcircle) nivelcircle.innerHTML = levelBadgeHTML(selectedLesson);
 
     clearSelection();
 

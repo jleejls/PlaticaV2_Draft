@@ -64,6 +64,19 @@
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
 
+
+  .level-number {
+    display: block;
+    line-height: 1.05;
+  }
+
+  .verb-name {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.9em;
+    line-height: 1.05;
+  }
+
   .lesson-button:hover {
     transform: translateY(-2px) scale(1.03);
     box-shadow: 0 7px 16px rgba(0,0,0,0.22);
@@ -71,12 +84,6 @@
 
   .lesson-button:active {
     transform: scale(0.98);
-  }
-
-  .footer-note {
-    margin-top: 18px;
-    font-size: 0.92rem;
-    opacity: 0.72;
   }
 
   @media (max-width: 700px) {
@@ -112,11 +119,6 @@
       font-size: 1rem;
       border-radius: 16px;
     }
-
-    .footer-note {
-      margin-top: 12px;
-      font-size: 0.82rem;
-    }
   }
 
   @media (max-height: 720px) and (max-width: 700px) {
@@ -140,33 +142,31 @@
 
 <div class="lesson-page">
   <div class="lesson-grid">
-    <button class="lesson-button" onclick="goToLesson(1)">Level 1</button>
-    <button class="lesson-button" onclick="goToLesson(2)">Level 2</button>
-    <button class="lesson-button" onclick="goToLesson(3)">Level 3</button>
-    <button class="lesson-button" onclick="goToLesson(4)">Level 4</button>
+    <button class="lesson-button" onclick="goToLesson(1)"><span class="level-number">Level 1</span><span class="verb-name">Tener</span></button>
+    <button class="lesson-button" onclick="goToLesson(2)"><span class="level-number">Level 2</span><span class="verb-name">Querer</span></button>
+    <button class="lesson-button" onclick="goToLesson(3)"><span class="level-number">Level 3</span><span class="verb-name">Decir</span></button>
+    <button class="lesson-button" onclick="goToLesson(4)"><span class="level-number">Level 4</span><span class="verb-name">Estar</span></button>
 
-    <button class="lesson-button" onclick="goToLesson(5)">Level 5</button>
-    <button class="lesson-button" onclick="goToLesson(6)">Level 6</button>
-    <button class="lesson-button" onclick="goToLesson(7)">Level 7</button>
-    <button class="lesson-button" onclick="goToLesson(8)">Level 8</button>
+    <button class="lesson-button" onclick="goToLesson(5)"><span class="level-number">Level 5</span><span class="verb-name">Necesitar</span></button>
+    <button class="lesson-button" onclick="goToLesson(6)"><span class="level-number">Level 6</span><span class="verb-name">Ir</span></button>
+    <button class="lesson-button" onclick="goToLesson(7)"><span class="level-number">Level 7</span><span class="verb-name">Saber</span></button>
+    <button class="lesson-button" onclick="goToLesson(8)"><span class="level-number">Level 8</span><span class="verb-name">Venir</span></button>
 
-    <button class="lesson-button" onclick="goToLesson(9)">Level 9</button>
-    <button class="lesson-button" onclick="goToLesson(10)">Level 10</button>
-    <button class="lesson-button" onclick="goToLesson(11)">Level 11</button>
-    <button class="lesson-button" onclick="goToLesson(12)">Level 12</button>
+    <button class="lesson-button" onclick="goToLesson(9)"><span class="level-number">Level 9</span><span class="verb-name">Comer</span></button>
+    <button class="lesson-button" onclick="goToLesson(10)"><span class="level-number">Level 10</span><span class="verb-name">Tomar</span></button>
+    <button class="lesson-button" onclick="goToLesson(11)"><span class="level-number">Level 11</span><span class="verb-name">Hablar</span></button>
+    <button class="lesson-button" onclick="goToLesson(12)"><span class="level-number">Level 12</span><span class="verb-name">Ver</span></button>
 
-    <button class="lesson-button" onclick="goToLesson(13)">Level 13</button>
-    <button class="lesson-button" onclick="goToLesson(14)">Level 14</button>
-    <button class="lesson-button" onclick="goToLesson(15)">Level 15</button>
-    <button class="lesson-button" onclick="goToLesson(16)">Level 16</button>
+    <button class="lesson-button" onclick="goToLesson(13)"><span class="level-number">Level 13</span><span class="verb-name">Ser</span></button>
+    <button class="lesson-button" onclick="goToLesson(14)"><span class="level-number">Level 14</span><span class="verb-name">Poder</span></button>
+    <button class="lesson-button" onclick="goToLesson(15)"><span class="level-number">Level 15</span><span class="verb-name">Vivir</span></button>
+    <button class="lesson-button" onclick="goToLesson(16)"><span class="level-number">Level 16</span><span class="verb-name">Haber</span></button>
 
-    <button class="lesson-button" onclick="goToLesson(17)">Level 17</button>
-    <button class="lesson-button" onclick="goToLesson(18)">Level 18</button>
-    <button class="lesson-button" onclick="goToLesson(19)">Level 19</button>
-    <button class="lesson-button" onclick="goToLesson(20)">Level 20</button>
+    <button class="lesson-button" onclick="goToLesson(17)"><span class="level-number">Level 17</span><span class="verb-name">Dar</span></button>
+    <button class="lesson-button" onclick="goToLesson(18)"><span class="level-number">Level 18</span><span class="verb-name">Poner</span></button>
+    <button class="lesson-button" onclick="goToLesson(19)"><span class="level-number">Level 19</span><span class="verb-name">Hacer</span></button>
+    <button class="lesson-button" onclick="goToLesson(20)"><span class="level-number">Level 20</span><span class="verb-name">Quedar</span></button>
   </div>
-
-  <div class="footer-note">Working level selector</div>
 </div>
 
 <script>
