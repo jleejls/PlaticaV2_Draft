@@ -1,0 +1,27 @@
+At line:1 char:2095
++ ...  + $newW + 'x' + $newH);     } catch {         $errors++;         Wri ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'x' + $newH);     } catch {         $errors++;         Write-Host ('ERROR' in expression or statement.
+At line:1 char:2095
++ ...   ' + $file.FullName + '  ' + $w + 'x' + $h + ' - + $newW + 'x' + $ne ...
++                                                                  ~
+Missing closing ')' in expression.
+At line:1 char:2581
++ ...  skipped:  ' + $skipped); Write-Host ('Errors:          ' + $errors);
++                                                             ~~~~~~~~~~~~~
+The string is missing the terminator: '.
+At line:1 char:322
++ ... rors = 0; foreach ($file in $files) {     $total++;     try {         ...
++                                                                 ~
+Missing closing '}' in statement block or type definition.
+At line:1 char:2594
++ ...  skipped:  ' + $skipped); Write-Host ('Errors:          ' + $errors);
++                                                                          ~
+The Try statement is missing its Catch or Finally block.
+At line:1 char:298
++ ... d = 0; $skipped = 0; $errors = 0; foreach ($file in $files) {     $to ...
++                                                                 ~
+Missing closing '}' in statement block or type definition.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+ 
