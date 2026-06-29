@@ -208,6 +208,68 @@
     margin:10px 0 14px;
   }
 
+
+
+  .donate-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10001;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.45);
+    padding:18px;
+  }
+
+  .donate-overlay[hidden]{ display:none; }
+
+  .donate-box{
+    width:min(92vw,430px);
+    max-height:88vh;
+    overflow:auto;
+    background:white;
+    color:black;
+    padding:22px;
+    border:2px solid #4CAF50;
+    border-radius:14px;
+    text-align:center;
+    font-family:Arial, Helvetica, sans-serif;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+  }
+
+  .donate-box h2{
+    margin:0 0 10px;
+    font-size:1.45rem;
+  }
+
+  .donate-box p{
+    margin:8px 0 14px;
+    font-size:1rem;
+    line-height:1.35;
+  }
+
+  #paypalDonateButtonContainer{
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:12px auto;
+  }
+
+  .donate-fallback,
+  .donate-close{
+    display:inline-block;
+    margin:6px 8px;
+    padding:9px 13px;
+    border-radius:8px;
+    border:1px solid #777;
+    background:#f4f4f4;
+    color:#111;
+    text-decoration:none;
+    font:14px Arial, Helvetica, sans-serif;
+    cursor:pointer;
+  }
+
   .prep-overlay{
     position:fixed;
     inset:0;
@@ -704,6 +766,131 @@
     next();
   }
 
+
+
+  function stopAllAudio(){
+    playToken++;
+    player.pause();
+    player.onended = null;
+    player.onerror = null;
+  }
+
+  const PAYPAL_DONATION_URL = "https://www.paypal.com/donate/?business=584TTG6ZNGVYY&no_recurring=0&item_name=Support+Spanish+Sound+Bites%2C+a+free+Spanish+learning+project.&currency_code=USD";
+  const PAYPAL_BUSINESS_ID = "584TTG6ZNGVYY";
+  const PAYPAL_DONATION_MESSAGE = "Support Spanish Sound Bites, a free Spanish learning project.";
+  let paypalDonateRendered = false;
+  let paypalDonateScriptLoading = false;
+
+  function buildDonateOverlay(){
+    const overlay = document.createElement("div");
+    overlay.id = "donateOverlay";
+    overlay.className = "donate-overlay";
+    overlay.hidden = true;
+
+    const box = document.createElement("div");
+    box.className = "donate-box";
+    box.innerHTML =
+      '<h2>Donación</h2>' +
+      '<p>If Spanish Sound Bites helps you, a small donation helps keep it free.</p>' +
+      '<div id="paypalDonateButtonContainer" aria-label="PayPal donate button">Loading PayPal...</div>' +
+      '<p style="font-size:.92rem;">PayPal should open as a popup over this page. If your browser blocks it, use the backup link.</p>' +
+      '<a class="donate-fallback" href="' + PAYPAL_DONATION_URL + '" target="_blank" rel="noopener">Backup PayPal link</a>';
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "donate-close";
+    close.textContent = "Close";
+    close.addEventListener("click", closeDonateOverlay);
+
+    box.appendChild(close);
+    overlay.appendChild(box);
+
+    overlay.addEventListener("click", ev => {
+      if (ev.target === overlay) closeDonateOverlay();
+    });
+
+    return overlay;
+  }
+
+  function ensureDonateOverlay(){
+    let overlay = document.getElementById("donateOverlay");
+    if (!overlay) {
+      overlay = buildDonateOverlay();
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  function loadPayPalDonateSDK(callback){
+    if (window.PayPal && window.PayPal.Donation && window.PayPal.Donation.Button) {
+      callback();
+      return;
+    }
+
+    if (paypalDonateScriptLoading) {
+      window.setTimeout(() => loadPayPalDonateSDK(callback), 120);
+      return;
+    }
+
+    paypalDonateScriptLoading = true;
+    const script = document.createElement("script");
+    script.src = "https://www.paypalobjects.com/donate/sdk/donate-sdk.js";
+    script.charset = "UTF-8";
+    script.onload = () => {
+      paypalDonateScriptLoading = false;
+      callback();
+    };
+    script.onerror = () => {
+      paypalDonateScriptLoading = false;
+      const container = document.getElementById("paypalDonateButtonContainer");
+      if (container) container.textContent = "PayPal could not load. Please use the backup link.";
+    };
+    document.head.appendChild(script);
+  }
+
+  function renderPayPalDonateButton(){
+    if (paypalDonateRendered) return;
+
+    const container = document.getElementById("paypalDonateButtonContainer");
+    if (!container) return;
+
+    container.textContent = "";
+
+    try {
+      PayPal.Donation.Button({
+        env: "production",
+        business: PAYPAL_BUSINESS_ID,
+        item_name: PAYPAL_DONATION_MESSAGE,
+        currency_code: "USD",
+        image: {
+          src: "https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif",
+          title: "PayPal - The safer, easier way to pay online!",
+          alt: "Donate with PayPal button"
+        },
+        onComplete: function(){
+          closeDonateOverlay();
+        }
+      }).render("#paypalDonateButtonContainer");
+
+      paypalDonateRendered = true;
+    } catch (err) {
+      console.warn("PayPal Donate SDK render failed:", err);
+      container.textContent = "PayPal could not start. Please use the backup link.";
+    }
+  }
+
+  function openDonateOverlay(){
+    stopAllAudio();
+    const overlay = ensureDonateOverlay();
+    overlay.hidden = false;
+    loadPayPalDonateSDK(renderPayPalDonateButton);
+  }
+
+  function closeDonateOverlay(){
+    const overlay = document.getElementById("donateOverlay");
+    if (overlay) overlay.hidden = true;
+  }
+
   const magnifyOverlay = document.getElementById("magnifyOverlay");
   const magnifyImage = document.getElementById("magnifyImage");
   let longPressTimer = null;
@@ -865,7 +1052,7 @@
     },
 
     donate(){
-      window.location.href = "donate.html";
+      openDonateOverlay();
     },
 
     email(){
