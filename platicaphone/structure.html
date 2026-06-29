@@ -92,6 +92,27 @@
     notes: "Strict compact phone layout: pronouns 3+3+3, expressions 2 circles, objects 3+4+3. No visible section words. No fallback layout."
   };
 
+  // Button structure belongs here, not in conductor.html.
+  // The conductor only reads buttonStorage and renders these buttons.
+  const buttonStorage = {
+    version: "platica-phone-buttons-from-structure-20260629",
+    bar: {
+      id: "pbar",
+      className: "zipbutton",
+      ariaLabel: "Program buttons"
+    },
+    buttons: [
+      { action: "continue",  img: "../trigger/adelante.jpg",  alt: "Adelante",      title: "Continuar / next lesson" },
+      { action: "exit",      img: "../trigger/exit.jpg",      alt: "Exit",          title: "Exit" },
+      { action: "choosel",   img: "../trigger/choosel.jpg",   alt: "Choose lesson", title: "Choose lesson" },
+      { action: "help",      img: "../trigger/help.jpg",      alt: "Help",          title: "Help / guidelines" },
+      { action: "donate",    img: "../trigger/donate.jpg",    alt: "Donate",        title: "Donate" },
+      { action: "email",     img: "../trigger/email.jpg",     alt: "Email",         title: "Contact Jimmy Lucky" },
+      { action: "lagente",   img: "../trigger/lagente.jpg",   alt: "La Gente",      title: "La Gente" },
+      { action: "translate", img: "../trigger/translate.jpg", alt: "Translate",     title: "Translation" }
+    ]
+  };
+
   // Clear old layout protocols so they cannot leak into the modular conductor.
   [
     "layoutRows",
@@ -99,6 +120,7 @@
     "phoneLayout",
     "phoneStyle",
     "buttonSlots",
+    "buttonStorage",
     "desktopSlots",
     "desktopLayout",
     "desktopStyle"
@@ -110,6 +132,7 @@
   sessionStorage.setItem("expressionSlots", JSON.stringify(expressionSlots));
   sessionStorage.setItem("expressionPronounIds", JSON.stringify([10, 11]));
   sessionStorage.setItem("phoneLayoutConfig", JSON.stringify(phoneLayoutConfig));
+  sessionStorage.setItem("buttonStorage", JSON.stringify(buttonStorage));
 
   setTimeout(() => {
     window.location.href = "lessonselect.html";

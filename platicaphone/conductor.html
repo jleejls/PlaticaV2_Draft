@@ -421,18 +421,6 @@
   </section>
 </main>
 
-<div id="pbar" class="zipbutton" aria-label="Program buttons">
-  <div class="buttonz" data-btn="continue" title="Continuar / next lesson"><img src="../trigger/adelante.jpg" alt="Adelante"></div>
-  <div class="buttonz" data-btn="exit" title="Exit"><img src="../trigger/exit.jpg" alt="Exit"></div>
-  <div class="buttonz" data-btn="choosel" title="Choose lesson"><img src="../trigger/choosel.jpg" alt="Choose lesson"></div>
-  <div class="buttonz" data-btn="help" title="Help / guidelines"><img src="../trigger/help.jpg" alt="Help"></div>
-  <div class="buttonz" data-btn="donate" title="Donate"><img src="../trigger/donate.jpg" alt="Donate"></div>
-  <div class="buttonz" data-btn="email" title="Contact Jimmy Lucky"><img src="../trigger/email.jpg" alt="Email"></div>
-  <div class="buttonz" data-btn="lagente" title="La Gente"><img src="../trigger/lagente.jpg" alt="La Gente"></div>
-  <div class="buttonz" data-btn="translate" title="Translation"><img src="../trigger/translate.jpg" alt="Translate"></div>
-</div>
-
-
 <div id="magnifyOverlay" class="magnify-overlay" hidden aria-label="Magnified image preview">
   <div class="magnify-box">
     <img id="magnifyImage" alt="Magnified preview">
@@ -505,10 +493,27 @@
   const LESSON_ROOT = "../group/lesson" + lesson;
 
   const phoneLayoutConfig = readJSON("phoneLayoutConfig");
+  const buttonStorage = readJSON("buttonStorage");
   const pronounSlots = readJSON("pronounSlots");
   const objectSlots = readJSON("objectSlots");
   const expressionSlots = readJSON("expressionSlots");
   const layoutRows = phoneLayoutConfig.rows;
+
+  function validateButtonStorage(storage){
+    if (!storage || typeof storage !== "object") failStructure("buttonStorage is missing or invalid.");
+    if (!Array.isArray(storage.buttons) || !storage.buttons.length) {
+      failStructure("buttonStorage.buttons is missing or empty.");
+    }
+
+    storage.buttons.forEach((button, index) => {
+      if (!button || typeof button !== "object") failStructure("Invalid buttonStorage button at index " + index);
+      if (typeof button.action !== "string" || !button.action) failStructure("Missing button action at buttonStorage.buttons[" + index + "]");
+      if (typeof button.img !== "string" || !button.img) failStructure("Missing button image at buttonStorage.buttons[" + index + "]");
+      if (typeof button.title !== "string" || !button.title) failStructure("Missing button title at buttonStorage.buttons[" + index + "]");
+    });
+
+    return storage;
+  }
 
   function validateSlots(name, slots){
     if (!Array.isArray(slots) || !slots.length) failStructure("Missing or empty sessionStorage key: " + name);
@@ -531,6 +536,7 @@
     });
   }
 
+  validateButtonStorage(buttonStorage);
   validateRows(layoutRows);
   validateSlots("pronounSlots", pronounSlots);
   validateSlots("objectSlots", objectSlots);
@@ -687,7 +693,34 @@
     return tile;
   }
 
+  function renderButtonBar(storage){
+    const oldBar = document.getElementById((storage.bar && storage.bar.id) || "pbar");
+    if (oldBar) oldBar.remove();
+
+    const bar = document.createElement("div");
+    bar.id = (storage.bar && storage.bar.id) || "pbar";
+    bar.className = (storage.bar && storage.bar.className) || "zipbutton";
+    bar.setAttribute("aria-label", (storage.bar && storage.bar.ariaLabel) || "Program buttons");
+
+    storage.buttons.forEach(buttonInfo => {
+      const button = document.createElement("div");
+      button.className = "buttonz";
+      button.dataset.btn = buttonInfo.action;
+      button.title = buttonInfo.title;
+
+      const img = document.createElement("img");
+      img.src = buttonInfo.img;
+      img.alt = buttonInfo.alt || buttonInfo.title || buttonInfo.action;
+      button.appendChild(img);
+      bar.appendChild(button);
+    });
+
+    const insertBefore = document.getElementById("magnifyOverlay") || document.getElementById("contactOverlay") || document.getElementById("player");
+    document.body.insertBefore(bar, insertBefore || null);
+  }
+
   applyStructureLayout();
+  renderButtonBar(buttonStorage);
 
   document.getElementById("banner").textContent = "Phone — Level " + lesson;
 
@@ -1074,7 +1107,9 @@
     }
   };
 
-  document.getElementById("pbar").addEventListener("click", ev => {
+  const buttonBar = document.getElementById("pbar");
+  if (!buttonBar) failStructure("buttonStorage did not create #pbar.");
+  buttonBar.addEventListener("click", ev => {
     const button = ev.target.closest(".buttonz[data-btn]");
     if (!button) return;
 
