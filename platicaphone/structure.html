@@ -135,6 +135,17 @@
   sessionStorage.setItem("buttonStorage", JSON.stringify(buttonStorage));
 
   setTimeout(() => {
+    const params = new URLSearchParams(window.location.search);
+    const firstTime = params.get("firstTime") === "1" || params.get("autoStartLevel1") === "1";
+
+    if (firstTime) {
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+      sessionStorage.setItem("currentLesson", "1");
+      window.location.href = "conductor.html?autoStartLevel1=1&lesson=1&prep=" + Date.now();
+      return;
+    }
+
     window.location.href = "lessonselect.html";
   }, 250);
 })();

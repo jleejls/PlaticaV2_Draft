@@ -54,7 +54,45 @@
     </p>
   </div>
 
-  <button onclick="location.href='lagente.html'">Continuar</button>
+  <button onclick="startFirstTimeFlow()">Continuar</button>
+
+  <script>
+    function shouldUsePhonePath(){
+      const PHONE_WIDTH_LIMIT = 700;
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("phone") === "1") return true;
+      if (params.get("desktop") === "1") return false;
+
+      const narrowScreen = window.matchMedia(`(max-width: ${PHONE_WIDTH_LIMIT}px)`).matches;
+      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+      const hasTouch = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
+
+      return narrowScreen && (coarsePointer || hasTouch);
+    }
+
+    function startFirstTimeFlow(){
+      const lane = shouldUsePhonePath() ? "phone" : "desktop";
+
+      sessionStorage.setItem("firstTimeStart", "yes");
+      sessionStorage.setItem("autoStartLevel1", "yes");
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+      sessionStorage.setItem("currentLesson", "1");
+      sessionStorage.setItem("platicaLane", lane);
+      sessionStorage.setItem("inglesyaLane", lane);
+
+      localStorage.setItem("firstTimeStart", "yes");
+      localStorage.setItem("autoStartLevel1", "yes");
+      localStorage.setItem("lesson", "1");
+      localStorage.setItem("selectedLesson", "1");
+      localStorage.setItem("currentLesson", "1");
+      localStorage.setItem("platicaLane", lane);
+      localStorage.setItem("inglesyaLane", lane);
+
+      window.location.href = "lagente.html?firstTime=1&autoStartLevel1=1&lesson=1&lane=" + encodeURIComponent(lane);
+    }
+  </script>
 
 </body>
 </html>
