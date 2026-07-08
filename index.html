@@ -93,7 +93,7 @@
 
     <div class="section">
       <h2>First Time Here?</h2>
-      <button onclick="location.href='welcome.html'">Start from the Beginning</button>
+      <button onclick="goToFirstTime()">Start from the Beginning</button>
     </div>
 
     <div class="section">
@@ -117,6 +117,18 @@
       return narrowScreen && (coarsePointer || hasTouch);
     }
 
+
+
+    function goToFirstTime(){
+      sessionStorage.setItem('phoneMode', '1');
+      sessionStorage.removeItem('desktopMode');
+      sessionStorage.setItem('lesson', '1');
+      sessionStorage.setItem('selectedLesson', '1');
+      sessionStorage.setItem('currentLesson', '1');
+      sessionStorage.setItem('nivel', '1');
+      sessionStorage.setItem('selectedNivel', '1');
+      window.location.href = 'firststart.html';
+    }
     function startProgram(){
       if (shouldUsePhonePath()) {
         sessionStorage.setItem('phoneMode', '1');

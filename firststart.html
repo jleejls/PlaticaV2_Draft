@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plática First Start</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #57ecf6;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .first-start-card {
+      width: min(96vw, 760px);
+      min-height: 96vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: tan;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .help-image {
+      width: 80vw;
+      height: 72vh;
+      max-width: 720px;
+      object-fit: contain;
+      display: block;
+      border-radius: 14px;
+      background: white;
+    }
+
+    .instruction {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-weight: bold;
+      margin: 4px 0 8px;
+      color: #111;
+    }
+
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 26px;
+      font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+    }
+
+    button:hover { background: #005fa3; }
+  </style>
+</head>
+
+<body>
+  <main class="first-start-card">
+    <img id="helpImage" class="help-image" src="trigger/help.jpg" alt="Press this button in the program">
+
+    <p class="instruction">
+      When you see this picture in the program, press that button for guidelines and help.
+    </p>
+
+    <button type="button" onclick="startLevelOne()">Continue</button>
+  </main>
+
+  <script>
+    const helpImage = document.getElementById("helpImage");
+    const imagePaths = [
+      "trigger/help.jpg",
+      "Trigger/help.jpg",
+      "triggers/help.jpg",
+      "Triggers/help.jpg",
+      "help.jpg"
+    ];
+    let imagePathIndex = 0;
+
+    helpImage.onerror = function () {
+      imagePathIndex++;
+      if (imagePathIndex < imagePaths.length) {
+        helpImage.src = imagePaths[imagePathIndex] + "?v=" + Date.now();
+      } else {
+        helpImage.alt = "The help image was not found. Check the folder name and file name.";
+      }
+    };
+
+    function startLevelOne(){
+      sessionStorage.setItem("phoneMode", "1");
+      sessionStorage.removeItem("desktopMode");
+
+      sessionStorage.setItem("lesson", "1");
+      sessionStorage.setItem("selectedLesson", "1");
+      sessionStorage.setItem("currentLesson", "1");
+      sessionStorage.setItem("nivel", "1");
+      sessionStorage.setItem("selectedNivel", "1");
+      sessionStorage.setItem("firstTimeStart", "yes");
+      sessionStorage.setItem("autoStartLevel1", "yes");
+
+      localStorage.setItem("lesson", "1");
+      localStorage.setItem("selectedLesson", "1");
+      localStorage.setItem("currentLesson", "1");
+      localStorage.setItem("nivel", "1");
+      localStorage.setItem("selectedNivel", "1");
+      localStorage.setItem("firstTimeStart", "yes");
+      localStorage.setItem("autoStartLevel1", "yes");
+
+      window.location.href = "platicaphone/structure.html?firstTime=1&lesson=1&prep=" + Date.now();
+    }
+  </script>
+</body>
+</html>
