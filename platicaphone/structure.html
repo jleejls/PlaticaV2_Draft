@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plática Phone Structure - Compact 3x3 Pronouns</title>
+  <title>Plática Phone Structure - Direct Level Start</title>
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -28,7 +28,7 @@
   </style>
 </head>
 <body>
-  <div id="notice">Plática compact phone structure loaded</div>
+  <div id="notice">Plática phone structure prepared</div>
 
 <script>
 (function () {
@@ -137,17 +137,27 @@
   setTimeout(() => {
     const params = new URLSearchParams(window.location.search);
     const firstTime = params.get("firstTime") === "1" || params.get("autoStartLevel1") === "1";
+    const direct = params.get("direct") === "1" || params.get("lesson") || firstTime;
 
-    if (firstTime) {
-      sessionStorage.setItem("lesson", "1");
-      sessionStorage.setItem("selectedLesson", "1");
-      sessionStorage.setItem("currentLesson", "1");
-      window.location.href = "conductor.html?autoStartLevel1=1&lesson=1&prep=" + Date.now();
-      return;
-    }
+    let lessonToOpen = nivelToUse;
+    if (firstTime) lessonToOpen = "1";
 
-    window.location.href = "lessonselect.html";
-  }, 250);
+    // IMPORTANT PHONE REPAIR:
+    // Structure is now the preparation page only. It always writes a fresh
+    // compact phone layout and then opens the conductor. It no longer sends
+    // first-time users through La Gente or Lesson Select. Lesson Select remains
+    // available only from button number 3 inside the program.
+    sessionStorage.setItem("lesson", lessonToOpen);
+    sessionStorage.setItem("selectedLesson", lessonToOpen);
+    sessionStorage.setItem("currentLesson", lessonToOpen);
+    sessionStorage.setItem("nivel", lessonToOpen);
+    sessionStorage.setItem("selectedNivel", lessonToOpen);
+    sessionStorage.setItem("platicaMode", "phone");
+    sessionStorage.setItem("phoneMode", "1");
+    sessionStorage.removeItem("desktopMode");
+
+    window.location.href = "conductor.html?lesson=" + encodeURIComponent(lessonToOpen) + "&prep=" + Date.now();
+  }, 150);
 })();
 </script>
 </body>

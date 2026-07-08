@@ -23,11 +23,12 @@
     background:#ffffff;
     font-family:Arial, Helvetica, sans-serif;
     color:#222;
-    overflow:hidden;
+    overflow-x:hidden;
+    overflow-y:auto;
   }
 
   body{
-    padding-bottom:54px;
+    padding-bottom:58px;
   }
 
   body.layout-loading main,
@@ -555,8 +556,12 @@
     const rowGap = numberOr(phoneLayoutConfig.rowGapPx, 2);
     const columnGap = numberOr(phoneLayoutConfig.columnGapPx, rowGap);
 
+    // PHONE REPAIR:
+    // Do not let a short browser viewport, the welcome page, or the mobile
+    // address bar shrink all lesson images. Size the board primarily from
+    // screen width. If a very short phone needs more room, allow vertical
+    // scrolling instead of crushing the pictures.
     const viewportWidth = Math.max(300, Math.min(window.innerWidth || 360, 430));
-    const viewportHeight = Math.max(420, window.innerHeight || 640);
 
     const widthLimit = layoutRows.reduce((limit, row) => {
       const count = row.ids.length;
@@ -565,18 +570,10 @@
       return Math.min(limit, Math.floor(usableWidth / (count * rowScale)));
     }, 9999);
 
-    const pronounRows = layoutRows.filter(row => row.group === "pronouns").length;
-    const objectRows = layoutRows.filter(row => row.group === "objects").length;
-    const expressionRows = layoutRows.filter(row => row.group === "expressions").length;
-    const totalGap = Math.max(0, layoutRows.length - 1) * rowGap;
-    const usableHeight = viewportHeight - 56 - 10 - totalGap;
-    const heightUnits = pronounRows + objectRows * objectScale + expressionRows * expressionScale;
-    const heightLimit = Math.floor(usableHeight / heightUnits);
-
-    const frameSize = Math.floor(Math.max(48, Math.min(widthLimit, heightLimit, 102) * frameScale));
+    const frameSize = Math.floor(Math.max(86, Math.min(widthLimit, 108) * frameScale));
     root.style.setProperty("--frame-size", frameSize + "px");
-    root.style.setProperty("--object-size", Math.max(38, Math.round(frameSize * objectScale)) + "px");
-    root.style.setProperty("--circle-size", Math.max(34, Math.round(frameSize * expressionScale)) + "px");
+    root.style.setProperty("--object-size", Math.max(62, Math.round(frameSize * objectScale)) + "px");
+    root.style.setProperty("--circle-size", Math.max(48, Math.round(frameSize * expressionScale)) + "px");
     root.style.setProperty("--row-gap", rowGap + "px");
     root.style.setProperty("--column-gap", columnGap + "px");
   }
@@ -1069,7 +1066,7 @@
         return;
       }
       storeLesson(nextLesson);
-      window.location.href = "conductor.html?lesson=" + encodeURIComponent(nextLesson);
+      window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson);
     },
 
     exit(){

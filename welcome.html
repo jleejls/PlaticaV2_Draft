@@ -1,99 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bite-Sized Spanish</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Plática</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #ADD8E6;
-      margin: 0;
-      padding: 0px;
-    }
-
-    .container {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      padding: 5px;
-      max-width: 900px;
-      min-height: 95vh;
-      margin: 2px auto;
-      font-size: clamp(1.4rem, 3.2vw, 3rem);
-      padding: 2vh 4vw;
-      line-height: 1.1;
-    }
-
-    h1 {
-      text-align: center;
-      color: #003366;
-    }
-
-    button {
-      display: block;
-      margin: 30px auto;
-      font-size: 22px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 1px 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#57ecf6;color:#222;}
+    body{display:flex;align-items:center;justify-content:center;padding:18px;}
+    .card{width:min(92vw,430px);background:tan;border-radius:16px;padding:18px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+    h1{font-size:clamp(1.45rem,7vw,2rem);margin:.2rem 0 .75rem;}
+    p{font-size:clamp(1rem,4.5vw,1.2rem);line-height:1.35;margin:.6rem 0 1rem;}
+    button{min-height:52px;width:100%;border:0;border-radius:12px;background:#007acc;color:white;font-size:1.15rem;font-weight:700;cursor:pointer;}
+    button:active{transform:translateY(1px);}
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <p>
-      This program will help you chat in Spanish. It's about listening to sounds and letting your memory absorb them. It is as simple as that. This work is oriented around Spanish spoken Mexico, Central America and South America. However if you speak what this program teaches you will be able to chat in Spain as well. We will not study grammer or any other complications that a small child wouldn't understand. This is a lifetime change to your brain's ability to think and chat in Spanish. What you're about to learn isn't designed for a two-week vacation. It's a lifetime upgrade to your brain. Each phrase you absorb here rewires your mind just a little — and over time, you’ll notice something incredible: You’ll start to think in Spanish. Not translate. Think it and feel it. You’ll speak naturally. This is a new layer of thinking that will stay with you for life. Think about how long it took you to learn to chat in English. It wasn't a hurry-up deal. Neither is this. So be patient and persistent. It's for life. The Snap-On idea means that each commonly repeated phrase will be paired with natural everyday expressions which I have called snap-ons. These snap-ons extend the idea without needing grammar explanations. Everything here is based on connecting phrases. You will hear, imitate and repeat real expressions you can use right now. Every phrase has several of its own snap-ons. In every language a lot of basic phrases are repeated somtimes with slight changes, which is very handy for us. We then snap on different meanings to that basic phrase. That is why I call them snap-ons. You are encouraged to snap on some words of your own. Repetition is very important here. It is very important to listen and repeat phrases a lot. Over time you will Learn a lot of high usage phrases paired with the many natural snap-ons. You'll use them in realistic short conversations. Each level gives you just the right amount to absorb. Why this works: No overload. No confusion. Just meaningful phrases based on sound. After a few lessons your confidence builds fast. Learning That feels natural. You're learning to chat in living language. I've provided you with some tips that will guide you as they did for me as I was trying to conquer the basics of Spanish. Give them a chance. You will naturally need some translation. I have provided a little of that for you but use it at a minimum so you will start to think more and more in spanish. Translating slows chat way down and decreases comprehension. You must avoid too much translation-based thinking. By the way, if you have already studied Spanish and still can't chat fluently, be aware that previous study will help you here. By no means was it a wasted effort. It will help you glide along more easily and quickly. How long this will take largely depends on you. Be assured though, that it can be done in a reasonable length of time. Also know that when you complete this course, there is no "END" to learning Spanish, the same as it is with English. It isn't necessary to memorize every detail on every page. Just listen to the phrases. Then scan the other objects that you see there and hope some of that sticks in your memory. At least, listening to these sound bites will have some memory effect on your brain whether you realize it or not. You have the option to come back to any page at any time and review what you've already studied. This study is in the present tense only. This will get you communicating. Remember, you don't have to speak perfect Spanish to be understood; to be able to chat. A program to show you how to speak in the past and future is under development right now. It will be presented soon . as you go along, read the helps under the fourth button. Be patient and give youself a chance to see how this works. It may seem a little hard ad first but it gets easier as you go along. I developed this method because it's what worked for me.  Buen viaje!
-    </p>
-  </div>
-
-  <button onclick="startFirstTimeFlow()">Continuar</button>
+  <main class="card">
+    <h1>Welcome to Plática</h1>
+    <p>Start with Level 1. For instructions, use button number 4 inside the program.</p>
+    <button type="button" onclick="startLevelOne()">Start Level 1</button>
+  </main>
 
   <script>
-    function shouldUsePhonePath(){
-      const PHONE_WIDTH_LIMIT = 700;
-      const params = new URLSearchParams(window.location.search);
-
-      if (params.get("phone") === "1") return true;
-      if (params.get("desktop") === "1") return false;
-
-      const narrowScreen = window.matchMedia(`(max-width: ${PHONE_WIDTH_LIMIT}px)`).matches;
-      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-      const hasTouch = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
-
-      return narrowScreen && (coarsePointer || hasTouch);
-    }
-
-    function startFirstTimeFlow(){
-      const lane = shouldUsePhonePath() ? "phone" : "desktop";
-
-      sessionStorage.setItem("firstTimeStart", "yes");
-      sessionStorage.setItem("autoStartLevel1", "yes");
-      sessionStorage.setItem("lesson", "1");
-      sessionStorage.setItem("selectedLesson", "1");
-      sessionStorage.setItem("currentLesson", "1");
-      sessionStorage.setItem("platicaLane", lane);
-      sessionStorage.setItem("inglesyaLane", lane);
-
-      localStorage.setItem("firstTimeStart", "yes");
-      localStorage.setItem("autoStartLevel1", "yes");
-      localStorage.setItem("lesson", "1");
-      localStorage.setItem("selectedLesson", "1");
-      localStorage.setItem("currentLesson", "1");
-      localStorage.setItem("platicaLane", lane);
-      localStorage.setItem("inglesyaLane", lane);
-
-      window.location.href = "lagente.html?firstTime=1&autoStartLevel1=1&lesson=1&lane=" + encodeURIComponent(lane);
+    function startLevelOne(){
+      sessionStorage.setItem('phoneMode','1');
+      sessionStorage.removeItem('desktopMode');
+      sessionStorage.setItem('lesson','1');
+      sessionStorage.setItem('selectedLesson','1');
+      sessionStorage.setItem('currentLesson','1');
+      sessionStorage.setItem('platicaLane','phone');
+      window.location.href = './platicaphone/structure.html?autoStartLevel1=1&lesson=1';
     }
   </script>
-
 </body>
 </html>
