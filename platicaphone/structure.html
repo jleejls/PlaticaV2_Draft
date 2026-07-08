@@ -32,15 +32,21 @@
 
 <script>
 (function () {
+  const params = new URLSearchParams(window.location.search);
+
   const storedNivel =
-    sessionStorage.getItem("selectedNivel") ||
-    sessionStorage.getItem("nivel") ||
-    sessionStorage.getItem("selectedLevel") ||
-    sessionStorage.getItem("level") ||
-    sessionStorage.getItem("currentLevel") ||
+    params.get("lesson") ||
+    params.get("nivel") ||
+    params.get("level") ||
     sessionStorage.getItem("selectedLesson") ||
     sessionStorage.getItem("lesson") ||
     sessionStorage.getItem("currentLesson") ||
+    sessionStorage.getItem("selectedNivel") ||
+    sessionStorage.getItem("nivel") ||
+    sessionStorage.getItem("currentNivel") ||
+    sessionStorage.getItem("selectedLevel") ||
+    sessionStorage.getItem("level") ||
+    sessionStorage.getItem("currentLevel") ||
     "1";
 
   const n = Number(storedNivel);
@@ -135,7 +141,6 @@
   sessionStorage.setItem("buttonStorage", JSON.stringify(buttonStorage));
 
   setTimeout(() => {
-    const params = new URLSearchParams(window.location.search);
     const firstTime = params.get("firstTime") === "1" || params.get("autoStartLevel1") === "1";
     const direct = params.get("direct") === "1" || params.get("lesson") || firstTime;
 

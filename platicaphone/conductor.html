@@ -1035,12 +1035,28 @@
   }
 
   function storeLesson(n){
-    sessionStorage.setItem("lesson", String(n));
-    sessionStorage.setItem("selectedLesson", String(n));
-    sessionStorage.setItem("currentLesson", String(n));
-    localStorage.setItem("lesson", String(n));
-    localStorage.setItem("selectedLesson", String(n));
-    localStorage.setItem("currentLesson", String(n));
+    const level = String(n);
+
+    sessionStorage.setItem("lesson", level);
+    sessionStorage.setItem("selectedLesson", level);
+    sessionStorage.setItem("currentLesson", level);
+
+    // Keep the Spanish "nivel" keys synchronized too.
+    // structure.html checks these keys when it prepares the phone conductor.
+    sessionStorage.setItem("nivel", level);
+    sessionStorage.setItem("selectedNivel", level);
+    sessionStorage.setItem("currentNivel", level);
+
+    sessionStorage.setItem("level", level);
+    sessionStorage.setItem("selectedLevel", level);
+    sessionStorage.setItem("currentLevel", level);
+
+    localStorage.setItem("lesson", level);
+    localStorage.setItem("selectedLesson", level);
+    localStorage.setItem("currentLesson", level);
+    localStorage.setItem("nivel", level);
+    localStorage.setItem("selectedNivel", level);
+    localStorage.setItem("currentNivel", level);
   }
 
   function openContactOverlay(){
@@ -1066,7 +1082,7 @@
         return;
       }
       storeLesson(nextLesson);
-      window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson);
+      window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson) + "&prep=" + Date.now();
     },
 
     exit(){
