@@ -69,19 +69,19 @@
   // with expression circles moved into the lower spare row.
 
   const desktopSlots = [
-    // Object frames: left column, p1-p5
-    { group: "objects",  id: 1,  role: "object",   x: 1.2,  y: 0.4,  w: 9.0, h: 16.2 },
-    { group: "objects",  id: 2,  role: "object",   x: 1.2,  y: 17.1, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 3,  role: "object",   x: 1.2,  y: 33.8, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 4,  role: "object",   x: 1.2,  y: 50.5, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 5,  role: "object",   x: 1.2,  y: 67.2, w: 9.0, h: 16.2 },
+    // Object frames: left column, p1-p5 — 5% larger again, equal size, with added spacing
+    { group: "objects",  id: 1,  role: "object",   x: 0.0,  y: 0.0,  w: 12.5, h: 19.8 },
+    { group: "objects",  id: 2,  role: "object",   x: 0.0,  y: 20.1, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 3,  role: "object",   x: 0.0,  y: 40.2, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 4,  role: "object",   x: 0.0,  y: 60.3, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 5,  role: "object",   x: 0.0,  y: 80.4, w: 12.5, h: 19.8 },
 
-    // Object frames: right column, p6-p10
-    { group: "objects",  id: 6,  role: "object",   x: 89.8, y: 0.4,  w: 9.0, h: 16.2 },
-    { group: "objects",  id: 7,  role: "object",   x: 89.8, y: 17.1, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 8,  role: "object",   x: 89.8, y: 33.8, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 9,  role: "object",   x: 89.8, y: 50.5, w: 9.0, h: 16.2 },
-    { group: "objects",  id: 10, role: "object",   x: 89.8, y: 67.2, w: 9.0, h: 16.2 },
+    // Object frames: right column, p6-p10 — 5% larger again, equal size, with added spacing
+    { group: "objects",  id: 6,  role: "object",   x: 87.5, y: 0.0,  w: 12.5, h: 19.8 },
+    { group: "objects",  id: 7,  role: "object",   x: 87.5, y: 20.1, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 8,  role: "object",   x: 87.5, y: 40.2, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 9,  role: "object",   x: 87.5, y: 60.3, w: 12.5, h: 19.8 },
+    { group: "objects",  id: 10, role: "object",   x: 87.5, y: 80.4, w: 12.5, h: 19.8 },
 
     // Pronoun frames: 5 on the top row, 4 on the second row.
     // All nine pronoun frames use the same size. The second row is centered
@@ -99,8 +99,8 @@
 
     // Expression circles: moved into the lower spare row.
     // They can be tuned separately from the nine main pronoun frames.
-    { group: "pronouns", id: 10, role: "expression", shape: "circle", x: 32.0, y: 80.7, size: 84 },
-    { group: "pronouns", id: 11, role: "expression", shape: "circle", x: 61.5, y: 80.7, size: 84 }
+    { group: "pronouns", id: 10, role: "expression", shape: "circle", x: 31.2, y: 79.6, size: 108 },
+    { group: "pronouns", id: 11, role: "expression", shape: "circle", x: 60.7, y: 79.6, size: 108 }
   ];
 
   const buttonSlots = [
@@ -120,9 +120,9 @@
     boardBottom: "7.3vh",
     buttonBarBottom: "2vh",
     buttonGap: "0.55vw",
-    buttonWidth: "min(7.8vw, 94px)",
+    buttonWidth: "min(6.24vw, 75px)",
     buttonHeight: "min(5.2vh, 42px)",
-    buttonMinWidth: "70px",
+    buttonMinWidth: "56px",
     buttonMinHeight: "30px",
     buttonBackground: "#d05000",
     nivelCircleRight: "4vw",

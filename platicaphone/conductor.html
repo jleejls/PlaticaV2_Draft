@@ -1083,11 +1083,12 @@
       }
       storeLesson(nextLesson);
       window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson) + "&prep=" + Date.now();
-    },
+    
 
-    exit(){
-      window.location.href = "../quit.html";
-    },
+    exit()
+    window.location.href = "../stop.html";
+  },
+  
 
     choosel(){
       window.location.href = "lessonselect.html";
