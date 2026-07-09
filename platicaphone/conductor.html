@@ -1083,12 +1083,12 @@
       }
       storeLesson(nextLesson);
       window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson) + "&prep=" + Date.now();
-    
+    },
 
-    exit()
-    window.location.href = "../stop.html";
-  },
-  
+    exit(){
+      try { stopAllAudio(); } catch(e) {}
+      window.location.href = "../stop.html";
+    },
 
     choosel(){
       window.location.href = "lessonselect.html";
