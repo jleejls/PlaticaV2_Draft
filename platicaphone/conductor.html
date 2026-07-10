@@ -365,6 +365,7 @@
   .magnify-overlay[hidden]{ display:none; }
 
   .magnify-box{
+    position:relative;
     width:min(88vw,360px);
     height:min(88vw,360px);
     max-height:76vh;
@@ -375,7 +376,24 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    overflow:hidden;
+    overflow:visible;
+  }
+
+  .magnify-close{
+    position:absolute;
+    top:-14px;
+    right:-14px;
+    width:38px;
+    height:38px;
+    border:3px solid #ffffff;
+    border-radius:50%;
+    background:#c00000;
+    color:#ffffff;
+    font:700 24px/30px Arial, Helvetica, sans-serif;
+    text-align:center;
+    cursor:pointer;
+    z-index:2;
+    box-shadow:0 3px 9px rgba(0,0,0,.35);
   }
 
   .magnify-box img{
@@ -424,6 +442,7 @@
 
 <div id="magnifyOverlay" class="magnify-overlay" hidden aria-label="Magnified image preview">
   <div class="magnify-box">
+    <button type="button" id="magnifyCloseButton" class="magnify-close" aria-label="Close magnified image">×</button>
     <img id="magnifyImage" alt="Magnified preview">
   </div>
 </div>
@@ -986,9 +1005,13 @@
     if (ev.target.closest("[data-group][data-index]")) ev.preventDefault();
   });
 
-  if (magnifyOverlay) {
-    magnifyOverlay.addEventListener("pointerup", closeMagnifier);
-    magnifyOverlay.addEventListener("click", closeMagnifier);
+  const magnifyCloseButton = document.getElementById("magnifyCloseButton");
+  if (magnifyCloseButton) {
+    magnifyCloseButton.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      closeMagnifier();
+    });
   }
 
   document.addEventListener("click", ev => {
@@ -1053,12 +1076,6 @@
     sessionStorage.setItem("selectedLevel", level);
     sessionStorage.setItem("currentLevel", level);
 
-    localStorage.setItem("lesson", level);
-    localStorage.setItem("selectedLesson", level);
-    localStorage.setItem("currentLesson", level);
-    localStorage.setItem("nivel", level);
-    localStorage.setItem("selectedNivel", level);
-    localStorage.setItem("currentNivel", level);
   }
 
   function openContactOverlay(){
@@ -1123,9 +1140,8 @@
       const n = currentLesson();
       storeLesson(n);
       sessionStorage.setItem("lagenteReturnHref", window.location.href);
-      localStorage.setItem("lagenteReturnHref", window.location.href);
-      localStorage.setItem("platicaLane", "phone");
-      localStorage.setItem("inglesyaLane", "phone");
+      sessionStorage.setItem("platicaLane", "phone");
+      sessionStorage.setItem("inglesyaLane", "phone");
       window.location.href = "../lagente.html?return=phone&lesson=" + encodeURIComponent(n);
     },
 
