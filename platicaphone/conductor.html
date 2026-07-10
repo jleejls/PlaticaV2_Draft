@@ -699,10 +699,12 @@
     bar.className = (storage.bar && storage.bar.className) || "zipbutton";
     bar.setAttribute("aria-label", (storage.bar && storage.bar.ariaLabel) || "Program buttons");
 
-    storage.buttons.forEach(buttonInfo => {
+    storage.buttons.forEach((buttonInfo, buttonIndex) => {
       const button = document.createElement("div");
       button.className = "buttonz";
-      button.dataset.btn = buttonInfo.action;
+      // The leftmost phone button is always Advance, regardless of any stale
+      // action name that may have been saved previously by structure.html.
+      button.dataset.btn = buttonIndex === 0 ? "continue" : buttonInfo.action;
       button.title = buttonInfo.title;
 
       const img = document.createElement("img");
@@ -1078,11 +1080,22 @@
     continue(){
       const nextLesson = currentLesson() + 1;
       if (nextLesson > 20) {
-        alert("You are already on the last lesson.");
+        alert("You are already on the last level.");
         return;
       }
+
+      // Save the new level under every key used by the modular phone lane.
       storeLesson(nextLesson);
-      window.location.href = "structure.html?direct=1&lesson=" + encodeURIComponent(nextLesson) + "&prep=" + Date.now();
+
+      // Advance directly inside the phone conductor. The structure data is
+      // already present in sessionStorage, so returning through structure.html
+      // is unnecessary and could route the student back to lessonselect.html.
+      const query = new URLSearchParams({
+        lesson: String(nextLesson),
+        nivel: String(nextLesson),
+        prep: String(Date.now())
+      });
+      window.location.replace("conductor.html?" + query.toString());
     },
 
     exit(){
@@ -1130,7 +1143,11 @@
     ev.preventDefault();
     ev.stopPropagation();
 
-    const action = actions[button.dataset.btn];
+    // The first (far-left) phone button is always the advance button.
+    // This protects it from an old or incorrect action name stored by structure.html.
+    const isLeftAdvanceButton = button === buttonBar.firstElementChild;
+    const requestedAction = isLeftAdvanceButton ? "continue" : button.dataset.btn;
+    const action = actions[requestedAction];
     if (action) action();
   });
 })();
