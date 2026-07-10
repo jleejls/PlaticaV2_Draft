@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plática Phone Structure - Direct Level Start</title>
+  <title>Plática Phone Structure - No-Scroll Fit</title>
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -93,9 +93,12 @@
     columnGapPx: 3,
     expressionScale: 0.56,
     preventScrolling: true,
+    minimumFrameSize: 78,
+    buttonReservePx: 58,
+    heightSafetyPx: 4,
     preserveFrameOrder: true,
     rows: phoneRows,
-    notes: "Strict compact phone layout: pronouns 3+3+3, expressions 2 circles, objects 3+4+3. No visible section words. No fallback layout."
+    notes: "Strict compact phone layout with height-aware no-scroll fitting: pronouns 3+3+3, expressions 2 circles, objects 3+4+3. No visible section words. No fallback layout."
   };
 
   // Button structure belongs here, not in conductor.html.
